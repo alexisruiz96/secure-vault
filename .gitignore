@@ -7,3 +7,4 @@ testing-ground/react/node_modules/*
 testing-ground/typescript/nodejs/node_modules/*
 testing-ground/typescript/react/my-app/node_modules/*
 testing-ground/typescript/understand-ts_new/node_modules/*
+.vscode/*
