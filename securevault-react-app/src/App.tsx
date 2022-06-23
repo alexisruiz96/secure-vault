@@ -1,17 +1,10 @@
-import React, {useState} from 'react';
+import React from 'react';
 import SignUpForm from './components/SignUpForm';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import HomePage from './components/HomePage'
 
-interface User {
-    username: string,
-    email:string,
-    password: string
-}
-
 const App:React.FC = () => {
 
-  const [error,setError] = useState("");
   return (
     // </div>
     <BrowserRouter>
