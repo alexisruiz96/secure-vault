@@ -1,0 +1,6 @@
+@startuml Login
+User -> App: Authentication Request
+App -> Server: Login authentication Request
+App <-- Server: Login authentication Response
+User <-- App: Authentication Response
+@enduml

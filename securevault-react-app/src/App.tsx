@@ -1,55 +1,25 @@
 import React, {useState} from 'react';
-import LoginForm from './components/LoginForm';
-import * as CryptoUtil from'./modules/CryptoUtil'
+import SignUpForm from './components/SignUpForm';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import HomePage from './components/HomePage'
 
 interface User {
-  name: string,
-  email:string,
-  password: string
+    username: string,
+    email:string,
+    password: string
 }
 
 const App:React.FC = () => {
 
-  const adminUser = {
-    email: "admin@admin.com",
-    password: "admin123"
-  }
-
-  const [user, setUser] = useState({name:"", email: ""});
-  const [error, setError] = useState("");
-
-  const Login = async (details:User) => {
-    console.log(details);
-
-    if(details.email === adminUser.email && details.password === adminUser.password)
-    {
-      await console.log(CryptoUtil.generateKey(details.password))
-      console.log('Logged in!');
-      setUser({
-        name: details.name,
-        email: details.email
-      })
-    } else{
-      console.log('Details do not match');
-      setError('Details do not match');
-    }
-  }
-
-  const Logout = () => {
-    setUser({name:"", email: ""});
-  }
-
+  const [error,setError] = useState("");
   return (
-    <div className="App">
-      {(user.email !== "") ? (
-        <div className="welcome">
-          <h2>Welcome, <span>{user.name}</span></h2>
-          <button onClick={Logout}>Logout</button>
-        </div>
-      ) : (
-        <LoginForm Login={Login} error={error}/>
-      )}
-      </div>
+    // </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path='/' element={<HomePage/>}></Route>
+        <Route path='signup' element={<SignUpForm/>}></Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 

@@ -84,7 +84,7 @@ form .form-inner .form-group input:focus{
 }
 
 form .form-inner input[type="submit"],
-.welcome button {
+.welcome button, button {
     display: inline-block;
     padding: 10px 15px;
     border-radius: 8px;
@@ -95,10 +95,12 @@ form .form-inner input[type="submit"],
     color: #FFF;
     font-weight: 700;
     cursor: pointer;
+    margin-left: 5px;
 }
 
 form .form-inner input[type="submit"]:hover,
-.welcome button:hover {
+.welcome button:hover,
+button:hover {
     background-position: 100% 0%;
 }
 

@@ -1,13 +1,15 @@
 import React, {useState} from 'react'
+import {useNavigate} from 'react-router-dom'
 
 type FormProps ={
     error: string;
-    Login: (loginInfo: {name: string, email:string ,password: string}) => void;
+    Login: (loginInfo: {username: string, email:string ,password: string}) => void;
 }
 
 const LoginForm:React.FC<FormProps> = ({Login, error}) => {
 
-    const [details, setDetails] = useState({name:"", email: "", password:""});
+    const [details, setDetails] = useState({username:"", email: "", password:""});
+    const navigate = useNavigate();
 
     const submitHandler = (event:React.FormEvent) => {
         event.preventDefault();
@@ -15,14 +17,14 @@ const LoginForm:React.FC<FormProps> = ({Login, error}) => {
         Login(details);
     }
 
-  return (
+    return (
       <form onSubmit={submitHandler}>
           <div className='form-inner'>
               <h2>Login</h2>
               {(error !=="") ? ( <div className='error'>{error}</div>) : ''}
               <div className='form-group'>
-                  <label htmlFor="name">Name:</label>
-                  <input type="text" name='name' id='name' onChange={event => setDetails({...details, name: event.target.value})} value={details.name}/>
+                  <label htmlFor="username">Username:</label>
+                  <input type="text" name='username' id='username' onChange={event => setDetails({...details, username: event.target.value})} value={details.username}/>
               </div>
               <div className='form-group'>
                   <label htmlFor="email">Email: </label>
@@ -33,9 +35,10 @@ const LoginForm:React.FC<FormProps> = ({Login, error}) => {
                   <input type="password" name="password" id="password" onChange={event => setDetails({...details, password: event.target.value})} value={details.password}/>
               </div>
               <input type="submit" value="Login" />
+              <button onClick={() => navigate('/signup')}>Sign Up</button>
           </div>
       </form>
-  )
+    )
 }
 
 export default LoginForm;

@@ -14,8 +14,8 @@ interface EncryptedData {
 }
 
 const prefixSubKeys = {
-    authenticationKey: 'auth',
-    encryptionKey: 'enc'
+    authKey: 'auth',
+    encKey: 'enc'
 }
 
 /**
@@ -24,11 +24,20 @@ const prefixSubKeys = {
  */
 export const generateKey = async (password: string) => {
     // const salt = scryptPbkdf.salt()  
-    const fixedSalt = await generateFixedSalt(password) // returns an ArrayBuffer filled with 16 random bytes
+    const authPassword = prefixSubKeys.authKey + password;
+    const hashPwd = await generatePasswordHash(authPassword);
+    const iv = crypto.getRandomValues(new Uint8Array(16));
     const derivedKeyLength = 32 // in bytes
-    const key = await scryptPbkdf.scrypt(password, fixedSalt, derivedKeyLength) // key is an ArrayBuffer
+    const key = await scryptPbkdf.scrypt(hashPwd, iv, derivedKeyLength) // key is an ArrayBuffer
     console.log(key);console.log(convertBufferToBase64(key))
 
+    const base64IV = convertBufferToBase64(iv)
+    const base64Pwd = convertBufferToBase64(key)
+    const encryptedObject = {
+        base64IV,
+        base64Pwd
+    }
+    console.log(encryptedObject)
     return convertBufferToBase64(key);
 }
 
@@ -37,13 +46,12 @@ export const generateKey = async (password: string) => {
  * @param {string} password password introduced by user
  * @returns 
  */
-const generateFixedSalt = async (password: string) => {
+const generatePasswordHash = async (password: string): Promise<ArrayBuffer> => {
     const encoder = new TextEncoder()
     const data = encoder.encode(password)
     const hash = await subtleCrypto.digest('SHA-256', data)
     //console.log(hash)
-    //console.log(hash.slice(16))
-    return hash.slice(16)
+    return hash;
 }
 
 /**
