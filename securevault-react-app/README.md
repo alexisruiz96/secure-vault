@@ -1,3 +1,9 @@
+Instructions to run the React App
+1. Open a terminal and split it into separate ones
+2. Execute tsc -w
+3. Execute BROWSER=chromium port=8080 npm start
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
