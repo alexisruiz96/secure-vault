@@ -1,39 +1,58 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUser = exports.updateUser = exports.getUsers = exports.createUser = void 0;
-const user_1 = require("../models/user");
+const database_1 = require("../database");
 const USERS = [];
-const createUser = (req, res, next) => {
-    const text = req.body.text;
-    const id = Math.random().toString();
-    const newUser = new user_1.User(id, text);
-    USERS.push(newUser);
-    res.status(201).json({ message: 'Created the user.', createdUser: newUser });
-};
+const createUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = req.body;
+        const response = yield database_1.pool.query('INSERT INTO USERS (username, "password", versiontime, "data", salt) VALUES($1, $2, $3, $4, $5);', [user.username, user.password, user.versiontime, user.data, user.salt]);
+        return res.status(201).json('User has been created');
+    }
+    catch (error) {
+        return res.status(500).json('Error creating user due to ' + error);
+    }
+});
 exports.createUser = createUser;
-const getUsers = (req, res, next) => {
-    res.json({ users: USERS });
-};
+const getUsers = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const response = yield database_1.pool.query('SELECT * FROM USERS');
+        const result = response.rows[0].username;
+        return res.status(200).json({ users: response.rows });
+    }
+    catch (error) {
+        return res.status(500).json('Internal Server Error');
+    }
+});
 exports.getUsers = getUsers;
-const updateUser = (req, res, next) => {
-    const userId = req.params.id;
-    const updatedText = req.body.text;
-    const userIndex = USERS.findIndex(user => user.id === userId);
-    if (userIndex < 0) {
-        throw new Error('Could not find user!');
+const updateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = req.body;
+        yield database_1.pool.query('UPDATE USERS SET username=$1, password=$2, versiontime=$3, data=$4, salt=$5 WHERE id=$6', [user.username, user.password, user.versiontime, user.data, user.salt, req.params.id]);
+        return res.status(201).json('User has been modified');
     }
-    USERS[userIndex] = new user_1.User(USERS[userIndex].id, updatedText);
-    res.json({ message: 'Updated', updatedUser: USERS[userIndex] });
-};
+    catch (error) {
+        return res.status(500).json('Error modifying user due to ' + error);
+    }
+});
 exports.updateUser = updateUser;
-const deleteUser = (req, res, next) => {
-    const userId = req.params.id;
-    const updatedText = req.body.text;
-    const userIndex = USERS.findIndex(user => user.id === userId);
-    if (userIndex < 0) {
-        throw new Error('Could not find user!');
+const deleteUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = req.body;
+        yield database_1.pool.query('DELETE FROM USERS WHERE id=$1', [req.params.id]);
+        return res.status(201).json('User has been deleted');
     }
-    USERS.splice(userIndex, 1);
-    res.json({ message: 'User deleted!' });
-};
+    catch (error) {
+        return res.status(500).json('Error deleting user due to ' + error);
+    }
+});
 exports.deleteUser = deleteUser;
