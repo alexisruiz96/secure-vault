@@ -29,16 +29,21 @@ export const generateKey = async (password: string) => {
     const iv = crypto.getRandomValues(new Uint8Array(16));
     const derivedKeyLength = 32 // in bytes
     const key = await scryptPbkdf.scrypt(hashPwd, iv, derivedKeyLength) // key is an ArrayBuffer
-    console.log(key);console.log(convertBufferToBase64(key))
+    // console.log(key);console.log(convertBufferToBase64(key))
 
     const base64IV = convertBufferToBase64(iv)
     const base64Pwd = convertBufferToBase64(key)
+    //because we are going to use two salts we will store them in the database
+    //when we try to check the pwd we will need to decrypt with the salt from the server
+    //and after it with the salt of the 
+    //TODO change the way we store this information like and object and do it separately
     const encryptedObject = {
         base64IV,
         base64Pwd
     }
-    console.log(encryptedObject)
-    return convertBufferToBase64(key);
+    
+    console.log(JSON.stringify(encryptedObject))
+    return encryptedObject;
 }
 
 /**
@@ -124,7 +129,7 @@ export const encryptData = async (cryptoKeyJwk: string,data: string) => {
 export const decryptData = async (password: string,dataJSON: string) => {
 
     const key = await generateKey(password)
-    const cryptoKeyJwk = await generateCryptoKey(key)
+    const cryptoKeyJwk = await generateCryptoKey(key.base64Pwd)
     const cryptoKey = await convertJwkToCryptoKey(cryptoKeyJwk,hashAlgUsed)
 
     // const dataBuffer = fs.readFileSync('encrypted.json')

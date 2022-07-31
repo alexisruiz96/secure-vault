@@ -3,7 +3,8 @@ export class User{
         public id: string, 
         public username: string, 
         public password: string,
-        public versiontime: EpochTimeStamp,
+        public epochtime: EpochTimeStamp,
         public data: string,
-        public salt: string){}
+        public salt: string,
+        public email: string){}
 }

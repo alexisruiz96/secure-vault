@@ -9,13 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.getUsers = exports.createUser = void 0;
+exports.deleteUser = exports.updateUser = exports.getUserById = exports.getUsers = exports.createUser = void 0;
 const database_1 = require("../database");
 const USERS = [];
 const createUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = req.body;
-        const response = yield database_1.pool.query('INSERT INTO USERS (username, "password", versiontime, "data", salt) VALUES($1, $2, $3, $4, $5);', [user.username, user.password, user.versiontime, user.data, user.salt]);
+        const response = yield database_1.pool.query('INSERT INTO USERS (username, "password", epochtime, "data", salt_c, email,salt) VALUES($1, $2, $3, $4, $5, $6, $7);', [user.username, user.password, user.epochtime, user.data, user.salt, user.email, ""]);
         return res.status(201).json('User has been created');
     }
     catch (error) {
@@ -34,10 +34,21 @@ const getUsers = (req, res, next) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getUsers = getUsers;
+const getUserById = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const response = yield database_1.pool.query('SELECT * FROM USERS WHERE id=$1', [req.params.id]);
+        const result = response.rows[0].username;
+        return res.status(200).json({ users: response.rows });
+    }
+    catch (error) {
+        return res.status(500).json('Internal Server Error');
+    }
+});
+exports.getUserById = getUserById;
 const updateUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = req.body;
-        yield database_1.pool.query('UPDATE USERS SET username=$1, password=$2, versiontime=$3, data=$4, salt=$5 WHERE id=$6', [user.username, user.password, user.versiontime, user.data, user.salt, req.params.id]);
+        yield database_1.pool.query('UPDATE USERS SET username=$1, password=$2, epochtime=$3, data=$4, salt=$5 WHERE id=$6', [user.username, user.password, user.epochtime, user.data, user.salt, req.params.id]);
         return res.status(201).json('User has been modified');
     }
     catch (error) {

@@ -1,18 +1,23 @@
 import React, {useState} from 'react'
 import * as CryptoUtil from '../modules/CryptoUtil'
 import {useNavigate} from 'react-router-dom'
+import * as secureVaultApi from '../api/axios'
 
 
 interface User {
     username: string,
+    password: string,
+    epochtime: EpochTimeStamp,
+    data: string,
+    salt: string,
     email:string,
-    password: string
+
 }
 
 const SignUpForm:React.FC = () => {
 
-    const [details, setDetails] = useState({username:"", email: "", password:""});
-    const [, setUser] = useState({username:"", email: ""});
+    const [details, setDetails] = useState({username:"", password:"", epochtime: 0, data:"", salt:"" ,email: "" });
+    //const [, setUser] = useState({username:"", email: "", password:"", epochtime:0});
     const [error, setError] = useState("");
 
     const navigate = useNavigate();
@@ -25,16 +30,21 @@ const SignUpForm:React.FC = () => {
 
     const SignUp = async (details:User) => {
         console.log(details);
-    
         if(details.password != null)
         {
-          await console.log(CryptoUtil.generateKey(details.password))
+          const password_crypto = await CryptoUtil.generateKey(details.password);
+          let user = {...details};
+          user.password = password_crypto.base64Pwd;
+          user.salt = password_crypto.base64IV;
           //TODO send user object to the server
-          console.log('Signed up!');
-          setUser({
-            username: details.username,
-            email: details.email
-          })
+          /* setUser({
+          //   username: details.username,
+          //   email: details.email,
+          //   password: password_hash,
+          //   epochtime: Date.now()
+          // })
+          */ console.log(details);
+          secureVaultApi.createUser(user);
         } else{
           console.log('Details do not match');
           setError('Details do not match');

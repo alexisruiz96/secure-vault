@@ -2,13 +2,14 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 class User {
-    constructor(id, username, password, versiontime, data, salt) {
+    constructor(id, username, password, epochtime, data, salt, email) {
         this.id = id;
         this.username = username;
         this.password = password;
-        this.versiontime = versiontime;
+        this.epochtime = epochtime;
         this.data = data;
         this.salt = salt;
+        this.email = email;
     }
 }
 exports.User = User;

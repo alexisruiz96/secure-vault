@@ -12,5 +12,4 @@ app.use('/users', users_1.default);
 app.use((err, req, res, next) => {
     res.status(500).json({ message: err.message });
 });
-app.listen(4000);
-console.log('Server on port', 4000);
+app.listen(4000, () => { console.log('Server started on port ', 4000); });
