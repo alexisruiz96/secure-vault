@@ -10,7 +10,8 @@ const App:React.FC = () => {
     <BrowserRouter>
       <Routes>
         <Route path='/' element={<HomePage/>}></Route>
-        <Route path='signup' element={<SignUpForm/>}></Route>
+        <Route path='/signup' element={<SignUpForm/>}></Route>
+        <Route path='*' element={<h1>404 Not found</h1>}></Route>
       </Routes>
     </BrowserRouter>
   );

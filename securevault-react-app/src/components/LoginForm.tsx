@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import {useNavigate} from 'react-router-dom'
 
-type FormProps ={
+type FormProps = {
     error: string;
     Login: (loginInfo: {username: string, email:string ,password: string}) => void;
 }
@@ -34,7 +34,7 @@ const LoginForm:React.FC<FormProps> = ({Login, error}) => {
                   <label htmlFor="password">Password: </label>
                   <input type="password" name="password" id="password" onChange={event => setDetails({...details, password: event.target.value})} value={details.password}/>
               </div>
-              <input type="submit" value="Login" />
+              <input type="submit" value="Submit" />
               <button onClick={() => navigate('/signup')}>Sign Up</button>
           </div>
       </form>

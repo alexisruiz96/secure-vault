@@ -2,17 +2,7 @@ import React, {useState} from 'react'
 import * as CryptoUtil from '../modules/CryptoUtil'
 import {useNavigate} from 'react-router-dom'
 import * as secureVaultApi from '../api/axios'
-
-
-interface User {
-    username: string,
-    password: string,
-    epochtime: EpochTimeStamp,
-    data: string,
-    salt: string,
-    email:string,
-
-}
+import { User } from "../models/interfaces/User";
 
 const SignUpForm:React.FC = () => {
 
@@ -35,7 +25,7 @@ const SignUpForm:React.FC = () => {
           const password_crypto = await CryptoUtil.generateKey(details.password);
           let user = {...details};
           user.password = password_crypto.base64Pwd;
-          user.salt = password_crypto.base64IV;
+          user.salt = password_crypto.base64Salt;
           //TODO send user object to the server
           /* setUser({
           //   username: details.username,
@@ -44,6 +34,7 @@ const SignUpForm:React.FC = () => {
           //   epochtime: Date.now()
           // })
           */ console.log(details);
+          
           secureVaultApi.createUser(user);
         } else{
           console.log('Details do not match');
@@ -70,7 +61,7 @@ const SignUpForm:React.FC = () => {
                     <input type="password" name="password" id="password" onChange={event => setDetails({...details, password: event.target.value})} value={details.password}/>
                 </div>
                 <div>
-                    <input type="submit" value="Sign Up" />
+                    <input type="submit" value="Submit" />
                     <button onClick={() => navigate('/')}>Login</button>
                 </div>
             </div>
