@@ -4,7 +4,7 @@ import {useNavigate} from 'react-router-dom'
 import * as secureVaultApi from '../api/axios'
 import { User } from "../models/interfaces/User";
 
-const SignUpForm:React.FC = () => {
+const SignUpPage:React.FC = () => {
 
     const [details, setDetails] = useState({username:"", password:"", epochtime: 0, data:"", salt:"" ,email: "" });
     //const [, setUser] = useState({username:"", email: "", password:"", epochtime:0});
@@ -62,7 +62,7 @@ const SignUpForm:React.FC = () => {
                 </div>
                 <div>
                     <input type="submit" value="Submit" />
-                    <button onClick={() => navigate('/')}>Login</button>
+                    <button onClick={() => navigate('/login')}>Login</button>
                 </div>
             </div>
           </div>
@@ -70,4 +70,4 @@ const SignUpForm:React.FC = () => {
   )
 }
 
-export default SignUpForm;
+export default SignUpPage;

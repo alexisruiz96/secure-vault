@@ -1,15 +1,25 @@
-import { useAuth } from "../../api/auth";
-import { Navigate } from "react-router-dom";
-
-interface Props {
+import { useAuth} from "../../api/auth";
+import { Navigate, Routes } from "react-router-dom";
+import { RouteProps,Route, useLocation } from 'react-router-dom'
+interface Props extends RouteProps{
     children: React.ReactNode;
 }
 
 export const ProtectedRoute:React.FC<Props> = ({children}:Props) => {
-    const auth = useAuth();
+    debugger;
+    const {isAuthenticated} = useAuth();
+    const location = useLocation();
+
+    if(!isAuthenticated){
+        return <Navigate to="/login" />
+    }
+
     return (
-        <div>
-            {auth.isAuthenticated ? children : <Navigate to="/login"/>}
-        </div>
-    );
+        
+        <Routes>
+            <Route path={location.pathname} element={children} ></Route>
+        </Routes>
+        
+                        
+    )
 }

@@ -8,4 +8,9 @@ export interface User {
 
 }
 
-export type UserType = User;
+export type UserType ={
+    
+    username: string,
+    email:string,
+    password: string,
+};

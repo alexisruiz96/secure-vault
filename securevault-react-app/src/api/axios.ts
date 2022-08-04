@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
+import { UserType } from '../models/interfaces/User';
 
 
 interface User {
@@ -39,6 +40,24 @@ export const createUser = async (user: User): Promise<string> => {
     return "";
 };
 
+export const login = async (user: UserType): Promise<AxiosResponse> => {
+  const response = await axios({
+      method: 'get',
+      url: 'http://localhost:4000/users/login',
+      timeout:3000,
+      data: {
+          username: user.username,
+          password: user.password
+      },
+      headers:{
+        'Allow': 'GET',
+        'Content-Type': 'application/json',
+      }
+    });
+    console.log(response);
+  return response;
+};
+
 export const getUsers = async (req:Request, res: Response) => {
     
     
@@ -61,21 +80,3 @@ export const deleteUser = async (req:Request, res: Response) => {
 
     
 }
-
-export const login = async (user: User): Promise<AxiosResponse> => {
-  const response = await axios({
-      method: 'get',
-      url: 'http://localhost:4000/login',
-      timeout:3000,
-      data: {
-          username: user.username,
-          password: user.password
-      },
-      headers:{
-        'Allow': 'GET',
-        'Content-Type': 'application/json',
-      }
-    });
-    console.log(response);
-  return response;
-};

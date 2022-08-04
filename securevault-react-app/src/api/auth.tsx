@@ -1,45 +1,66 @@
 import { createContext, useState, useContext } from "react";
-import * as secureVaultApi from '../api/axios'
+import * as secureVaultApi from '../api/axios';
+import { UserType } from "../models/interfaces/User";
+import {useNavigate} from 'react-router-dom'
 interface Props {
-    children: React.ReactNode;
+    children: React.ReactNode[] | React.ReactNode;
 }
 
-const AuthContext: React.Context<any> = createContext(null);
+export type AuthContextType = {
+    isAuthenticated: boolean;
+    user: UserType;
+    login: (user: UserType) => void;
+    logout: () => void;
+    error: string;
+}
+
+const defaultUser = {username:"", password:"", email: "" };
+const defaultContext:AuthContextType = {
+    isAuthenticated: false,
+    user: defaultUser,
+    login: (user: UserType) => {},
+    logout: () => {},
+    error: ""
+}
+
+export const AuthContext = createContext<AuthContextType | null>(defaultContext);
 
 export const useAuth = () =>{
     const auth = useContext(AuthContext);
-    if(!auth){
-        throw new Error('useAuth must be used within a AuthProvider'); 
+    if (auth === null) {
+        throw new Error("useAuth must be used within a AuthProvider");
     }
+    
     return auth;
 }
 
 export const AuthProvider: React.FC<Props> = ({children}:Props) => {
     
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState<UserType>({username:"", password:"", email: "" });
     const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const navigate = useNavigate();
 
-    const login = async (details: any) => {
-        setLoading(true);
+    const login = async (details: UserType) => {
+        debugger;
         const response = await secureVaultApi.login(details);
         if (response.status === 200) {
-            setUser(response.data);
+
+            setUser({username:"Funciona", password:"test", email: "a@a.com"});
             setIsAuthenticated(true);
         } else {
             setError(response.data);
             setIsAuthenticated(false);
         }
-        setLoading(false);
     }
 
     const logout = () => {
-        setUser(null);
+        setUser(defaultUser);
+        navigate('/login');
     }
 
     return (
-        <AuthContext.Provider value={{isAuthenticated, user, login, logout, loading, error}}>
+        <AuthContext.Provider value={{isAuthenticated, user, login, logout, error}}>
             {children}
         </AuthContext.Provider>
     );

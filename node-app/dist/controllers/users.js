@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.getUserById = exports.getUsers = exports.createUser = void 0;
+exports.deleteUser = exports.updateUser = exports.getUserById = exports.getUsers = exports.loginUser = exports.createUser = void 0;
 const database_1 = require("../database");
 const USERS = [];
 const createUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -23,6 +23,19 @@ const createUser = (req, res, next) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.createUser = createUser;
+const loginUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = req.body;
+        // const response:QueryResult = await pool.query('INSERT INTO USERS (username, "password", epochtime, "data", salt_c, email,salt) VALUES($1, $2, $3, $4, $5, $6, $7);',
+        //     [user.username, user.password, user.epochtime, user.data, user.salt, user.email, ""]
+        // );
+        return res.status(200).json({ isLogged: true, message: 'Matching data' });
+    }
+    catch (error) {
+        return res.status(500).json({ isLogged: false, message: 'Error with the username or password' });
+    }
+});
+exports.loginUser = loginUser;
 const getUsers = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const response = yield database_1.pool.query('SELECT * FROM USERS');

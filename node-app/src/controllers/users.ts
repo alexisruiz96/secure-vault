@@ -1,5 +1,5 @@
 import {Request, Response, NextFunction, RequestHandler} from 'express'
-import {User as User} from '../models/user'
+import {User as User, Login} from '../models/user'
 import {pool} from '../database'
 import {QueryResult} from 'pg'
 
@@ -17,6 +17,21 @@ export const createUser: RequestHandler = async (req:Request, res: Response, nex
         return res.status(201).json('User has been created');
     } catch (error) {
         return res.status(500).json('Error creating user due to ' + error);
+    }
+};
+
+export const loginUser: RequestHandler = async (req:Request, res: Response, next): Promise<Response> => {
+    
+    try {
+        const user = ( req.body as Login);
+    
+        // const response:QueryResult = await pool.query('INSERT INTO USERS (username, "password", epochtime, "data", salt_c, email,salt) VALUES($1, $2, $3, $4, $5, $6, $7);',
+        //     [user.username, user.password, user.epochtime, user.data, user.salt, user.email, ""]
+        // );
+        
+        return res.status(200).json({isLogged: true, message:'Matching data'});
+    } catch (error) {
+        return res.status(500).json({isLogged: false, message:'Error with the username or password'});
     }
 };
 
