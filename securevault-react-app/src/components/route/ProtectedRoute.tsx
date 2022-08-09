@@ -15,11 +15,8 @@ export const ProtectedRoute:React.FC<Props> = ({children}:Props) => {
     }
 
     return (
-        
         <Routes>
             <Route path={location.pathname} element={children} ></Route>
-        </Routes>
-        
-                        
+        </Routes>         
     )
 }

@@ -15,7 +15,7 @@
 5. Create user with "create user kali with password 'kali';"
 6. Create database "create database securevault;"
 7. Check list of databases "select datname from pg_database;"
-8. Create table users
+8. Create table users (TODO: modify it with the actual state of the table)
     - CREATE TABLE USERS (
         ID SERIAL PRIMARY KEY NOT NULL,
         USERNAME varchar(25) NOT NULL UNIQUE,
@@ -23,6 +23,8 @@
         VERSIONTIME timestamp NULL,
         DATA varchar(255)NULL
     );
+
+- Run postgresql from terminal: "psql securevault"
 
 - Steps to connect postgresql with nodejs
     - https://www.youtube.com/watch?v=mltF9Qj0B_M 

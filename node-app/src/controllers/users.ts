@@ -1,17 +1,24 @@
 import {Request, Response, NextFunction, RequestHandler} from 'express'
-import {User as User, Login} from '../models/user'
+import {User as User, Login, UserName} from '../models/user'
 import {pool} from '../database'
 import {QueryResult} from 'pg'
+import { pbkdf2 } from "pbkdf2";
+import * as base64 from '@juanelas/base64';
 
 const USERS: User[] = [];
 
 export const createUser: RequestHandler = async (req:Request, res: Response, next): Promise<Response> => {
     
     try {
+        debugger;
         const user = ( req.body as User);
-    
-        const response:QueryResult = await pool.query('INSERT INTO USERS (username, "password", epochtime, "data", salt_c, email,salt) VALUES($1, $2, $3, $4, $5, $6, $7);',
-            [user.username, user.password, user.epochtime, user.data, user.salt, user.email, ""]
+        const derivedPwd = await pbkdf2Async(user.password, user.salt, 100000, 64,'sha512');
+        if (derivedPwd instanceof Error) {
+            return res.status(500).send(derivedPwd.message);
+        }
+        const data = (user.data !== "") ? user.data : null;
+        const response:QueryResult = await pool.query('INSERT INTO USERS (username, "password", epochtime, "data", salt, email) VALUES($1, $2, $3, $4, $5, $6);',
+            [user.username, derivedPwd, user.epochtime, data, user.salt, user.email]
         );
         
         return res.status(201).json('User has been created');
@@ -20,11 +27,34 @@ export const createUser: RequestHandler = async (req:Request, res: Response, nex
     }
 };
 
-export const loginUser: RequestHandler = async (req:Request, res: Response, next): Promise<Response> => {
+const pbkdf2Async = async (password: string, salt: string, iterations: number, keylen: number, digest: string): Promise<Error | string> => {
+    return new Promise( (res, rej) => {
+        pbkdf2(password, salt, iterations, keylen, digest, (err, derivedKey) => {
+            err ? rej(err) : res(base64.encode(derivedKey, true, false));
+        });
+    });
+}
+
+export const getSalt: RequestHandler = async (req:Request, res: Response, next): Promise<Response> => {
     
     try {
-        const user = ( req.body as Login);
+        const user = ( req.body as UserName);
     
+        const response:QueryResult = await pool.query('SELECT salt FROM USERS WHERE username LIKE $1;',
+            [user.username]
+        );
+        
+        return res.status(200).json({salt: response.rows[0].salt, message:'Server: Solve the challenge'});
+    } catch (error) {
+        return res.status(500).json({isLogged: false, message:'Error with the username'});
+    }
+};
+
+export const loginUser: RequestHandler = async (req:Request, res: Response, next): Promise<Response> => {
+    debugger;
+    try {
+        const user = ( req.body as Login);
+        console.log(user);
         // const response:QueryResult = await pool.query('INSERT INTO USERS (username, "password", epochtime, "data", salt_c, email,salt) VALUES($1, $2, $3, $4, $5, $6, $7);',
         //     [user.username, user.password, user.epochtime, user.data, user.salt, user.email, ""]
         // );

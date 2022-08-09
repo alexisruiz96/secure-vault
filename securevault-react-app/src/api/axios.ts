@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { UserType } from '../models/interfaces/User';
-
+import * as CryptoUtil from '../modules/CryptoUtil'
 
 interface User {
     username: string,
@@ -15,7 +15,7 @@ interface User {
 export const createUser = async (user: User): Promise<string> => {
     const response = await axios({
         method: 'post',
-        url: 'http://localhost:4000/users',
+        url: 'http://localhost:4000/users/signup',
         timeout:3000,
         data: {
             username: user.username,
@@ -41,19 +41,31 @@ export const createUser = async (user: User): Promise<string> => {
 };
 
 export const login = async (user: UserType): Promise<AxiosResponse> => {
-  const response = await axios({
-      method: 'get',
-      url: 'http://localhost:4000/users/login',
-      timeout:3000,
+  const saltResponse = await axios({
+      method: 'get', url: 'http://localhost:4000/users/salt', timeout:3000,
       data: {
-          username: user.username,
-          password: user.password
+          username: user.username
       },
       headers:{
-        'Allow': 'GET',
-        'Content-Type': 'application/json',
+        'Allow': 'GET', 'Content-Type': 'application/json',
       }
-    });
+  });
+
+  //TODO execute scrypt algorithm on the password and salt
+  const passwordScrypt = CryptoUtil.generateKey(user.password, saltResponse.data.salt);
+
+  //TODO check password with the database
+
+  const response = await axios({
+      method: 'post', url: 'http://localhost:4000/users/login', timeout:3000,
+      data: {
+          username: user.username, password: passwordScrypt, salt: saltResponse.data.salt
+      },
+      headers:{
+        'Allow': 'POST', 'Content-Type': 'application/json',
+      }
+  });
+
     console.log(response);
   return response;
 };
