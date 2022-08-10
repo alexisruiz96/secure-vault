@@ -45,8 +45,7 @@ export const AuthProvider: React.FC<Props> = ({children}:Props) => {
         debugger;
         const response = await secureVaultApi.login(details);
         if (response.status === 200) {
-
-            setUser({username:"Funciona", password:"test", email: "a@a.com"});
+            setUser({username: response.data.username, password: "", email: ""});
             setIsAuthenticated(true);
         } else {
             setError(response.data);

@@ -22,24 +22,16 @@ const SignUpPage:React.FC = () => {
         console.log(details);
         if(details.password != null)
         {
-          const password_crypto = await CryptoUtil.generateKey(details.password, null);
-          let user = {...details};
-          user.password = password_crypto.base64Pwd;
-          user.salt = password_crypto.base64Salt;
-          //TODO send user object to the server
-          /* setUser({
-          //   username: details.username,
-          //   email: details.email,
-          //   password: password_hash,
-          //   epochtime: Date.now()
-          // })
-          */ console.log(details);
-          
-          secureVaultApi.createUser(user);
-          navigate('/login');
+            const password_crypto = await CryptoUtil.generateKey(details.password, null);
+            let user = {...details};
+            user.password = password_crypto.base64Pwd;
+            user.salt = password_crypto.base64Salt;
+            
+            secureVaultApi.createUser(user);
+            navigate('/login');
         } else{
-          console.log('Details do not match');
-          setError('Details do not match');
+            console.log('Details do not match');
+            setError('Details do not match');
         }
     }
 

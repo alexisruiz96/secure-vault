@@ -10,30 +10,22 @@ interface User {
 
 const LoginPage:React.FC = () => {
 
-    // const adminUser = {
-    //     email: "admin@admin.com",
-    //     password: "admin123"
-    // }
-
     const [details, setDetails] = useState({username:"", email: "", password:""});
     const [error, setError] = useState("");
     const navigate = useNavigate();
-    const {login} = useAuth() as AuthContextType;
+    const {login, isAuthenticated} = useAuth() as AuthContextType;
     
     const Login = async (details:User) => {
         debugger;
+        
         await login(details);
         console.log(details);
-        //TODO send user and password to the server to check if it is correct
-        // if(details.email === adminUser.email && details.password === adminUser.password)
-        if(true)
-        {
-            // await console.log(CryptoUtil.generateKey(details.password))
+
+        if(isAuthenticated) {
             console.log('Logged in!');
             navigate('/');
-        } else{
-            console.log('Details do not match');
-            setError('Details do not match');
+        } else {
+            setError("Invalid username or password");
         }
     }
 

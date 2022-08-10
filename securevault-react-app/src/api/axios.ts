@@ -13,6 +13,8 @@ interface User {
 }
 
 export const createUser = async (user: User): Promise<string> => {
+    
+  try {
     const response = await axios({
         method: 'post',
         url: 'http://localhost:4000/users/signup',
@@ -31,35 +33,33 @@ export const createUser = async (user: User): Promise<string> => {
         }
       });
       console.log(response);
-    // try {
-
-    //     return "User created!"
-    // } catch (error) {
-    //     return "There has been a problem with the username, email or password.";
-    // }
+    } catch (error) {
+        console.log('Error creating user.');
+    }
+    
     return "";
 };
 
 export const login = async (user: UserType): Promise<AxiosResponse> => {
+  
+  debugger;
+  
   const saltResponse = await axios({
       method: 'get', url: 'http://localhost:4000/users/salt', timeout:3000,
-      data: {
-          username: user.username
+      params: {
+          "username": user.username
       },
       headers:{
         'Allow': 'GET', 'Content-Type': 'application/json',
       }
   });
 
-  //TODO execute scrypt algorithm on the password and salt
-  const passwordScrypt = CryptoUtil.generateKey(user.password, saltResponse.data.salt);
-
-  //TODO check password with the database
+  const passwordScrypt = await CryptoUtil.generateKey(user.password, saltResponse.data.salt);
 
   const response = await axios({
       method: 'post', url: 'http://localhost:4000/users/login', timeout:3000,
       data: {
-          username: user.username, password: passwordScrypt, salt: saltResponse.data.salt
+          username: user.username, password: passwordScrypt.base64Pwd, salt: saltResponse.data.salt
       },
       headers:{
         'Allow': 'POST', 'Content-Type': 'application/json',

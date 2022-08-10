@@ -38,7 +38,8 @@ const pbkdf2Async = async (password: string, salt: string, iterations: number, k
 export const getSalt: RequestHandler = async (req:Request, res: Response, next): Promise<Response> => {
     
     try {
-        const user = ( req.body as UserName);
+        console.log(req.params);
+        const user = ( req.query as UserName);
     
         const response:QueryResult = await pool.query('SELECT salt FROM USERS WHERE username LIKE $1;',
             [user.username]
@@ -53,15 +54,21 @@ export const getSalt: RequestHandler = async (req:Request, res: Response, next):
 export const loginUser: RequestHandler = async (req:Request, res: Response, next): Promise<Response> => {
     debugger;
     try {
+        debugger;
         const user = ( req.body as Login);
         console.log(user);
-        // const response:QueryResult = await pool.query('INSERT INTO USERS (username, "password", epochtime, "data", salt_c, email,salt) VALUES($1, $2, $3, $4, $5, $6, $7);',
-        //     [user.username, user.password, user.epochtime, user.data, user.salt, user.email, ""]
-        // );
-        
-        return res.status(200).json({isLogged: true, message:'Matching data'});
+        const derivedPwd = await pbkdf2Async(user.password, user.salt, 100000, 64,'sha512');
+        const response:QueryResult = await pool.query('SELECT EXISTS ( SELECT DISTINCT * FROM users u WHERE username like $1 and "password" like $2 );',
+            [user.username, derivedPwd]
+        );
+        console.log(response);
+        if (response.rows[0].exists) {
+            return res.status(200).json({isLogged: true, message:'Server: Logged in', username: user.username});
+        } else {
+            return res.status(500).json({isLogged: false, message:'Server: Error with the username or password.'});
+        }
     } catch (error) {
-        return res.status(500).json({isLogged: false, message:'Error with the username or password'});
+        return res.status(500).json({isLogged: false, message:'Server: Error with the username or password.'});
     }
 };
 

@@ -8,7 +8,7 @@ router.post('/signup',createUser);
 
 router.get('/salt', getSalt);
 
-router.get('/login',loginUser);
+router.post('/login',loginUser);
 
 router.get('/',getUsers);
 

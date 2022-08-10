@@ -11,7 +11,8 @@ export class User{
 
 export type Login = {
     username: string,
-    password: string
+    password: string,
+    salt: string
 }
 
 export type UserName = {
