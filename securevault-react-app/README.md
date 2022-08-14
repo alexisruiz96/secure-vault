@@ -9,3 +9,7 @@
 1. Create a folder p.e. "disableCORS" and another one inside called "data"
 2. Execute the following command
 	chromium --disable-web-security --user-data-dir="/home/kali/TFM/secure_vault/disableCORS/data"
+
+# Installation TailwindCSS
+- https://tailwindcss.com/docs/guides/create-react-app 
+

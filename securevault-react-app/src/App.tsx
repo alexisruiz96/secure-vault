@@ -1,8 +1,8 @@
 import React from 'react';
-import SignUpPage from './components/SignUpPage';
+import SignUpPage from './pages/SignUpPage';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import HomePage from './components/HomePage'
-import LoginPage from './components/LoginPage';
+import HomePage from './pages/HomePage'
+import LoginPage from './pages/LoginPage';
 import { ProtectedRoute } from './components/route/ProtectedRoute';
 import { AuthProvider } from './api/auth';
 

@@ -31,7 +31,7 @@ export const createUser = async (user: User): Promise<string> => {
           'Allow': 'POST',
           'Content-Type': 'application/json',
         }
-      });
+    });
       console.log(response);
     } catch (error) {
         console.log('Error creating user.');
@@ -66,7 +66,7 @@ export const login = async (user: UserType): Promise<AxiosResponse> => {
       }
   });
 
-    console.log(response);
+    // console.log(response);
   return response;
 };
 

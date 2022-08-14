@@ -1,5 +1,6 @@
 import React from 'react';
 import {useAuth} from '../api/auth'
+import MyDropzone from '../components/DropZone';
 
 
 const HomePage:React.FC = () => {
@@ -12,9 +13,10 @@ const HomePage:React.FC = () => {
     <div className="App">
       {
         //TODO add reference to new created page containing user uploaded data
-        <div className="welcome">
-          <h2>Welcome, <span>{user.username}</span></h2>
-          <button onClick={logout}>Logout</button>
+        <div className="welcome bg-slate-500 rounded-md">
+          <h2 className='text-center'>Welcome, <span>{user.username}</span></h2>
+          <MyDropzone />
+          <button onClick={logout} className="pt-6">Logout</button>
         </div>
       }
     </div>
