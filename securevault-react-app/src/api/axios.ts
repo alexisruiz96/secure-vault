@@ -66,29 +66,35 @@ export const login = async (user: UserType): Promise<AxiosResponse> => {
       }
   });
 
-    // console.log(response);
   return response;
 };
 
-export const getUsers = async (req:Request, res: Response) => {
-    
-    
-}
+export const uploadData = async (formData: FormData): Promise<AxiosResponse> => {
+  
+  debugger;
+  
+  const response = await axios({
+      method: 'post', url: 'http://localhost:4000/api/files/upload', timeout:3000,
+      data: formData,
+      headers:{
+        'Allow': 'POST', 'Content-Type': 'multipart/form-data',
+      }
+  });
+
+  return response;
+};
+
+export const getUsers = async (req:Request, res: Response) => {}
 
 export const getUserById = async (req:Request, res: Response)=> {
-    try {
-        const response = await axios.get('/users/ID=12345');
-        console.log(response);
-      } catch (error) {
-        console.error(error);
-      }
+    // try {
+    //     const response = await axios.get('/users/ID=12345');
+    //     console.log(response);
+    // } catch (error) {
+    //   console.error(error);
+    // }
 }
 
-export const updateUser=  async (req:Request, res: Response) => {
-    
-}
+export const updateUser=  async (req:Request, res: Response) => {}
 
-export const deleteUser = async (req:Request, res: Response) => {
-
-    
-}
+export const deleteUser = async (req:Request, res: Response) => {}
