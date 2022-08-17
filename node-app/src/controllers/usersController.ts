@@ -1,5 +1,5 @@
 import {Request, Response, NextFunction, RequestHandler} from 'express'
-import {User as User, Login, UserName} from '../models/user'
+import {User as User, Login, UserName} from '../models/userModel'
 import {pool} from '../database'
 import {QueryResult} from 'pg'
 import { pbkdf2 } from "pbkdf2";
@@ -38,7 +38,7 @@ const pbkdf2Async = async (password: string, salt: string, iterations: number, k
 export const getSalt: RequestHandler = async (req:Request, res: Response, next): Promise<Response> => {
     
     try {
-        console.log(req.params);
+        
         const user = ( req.query as UserName);
     
         const response:QueryResult = await pool.query('SELECT salt FROM USERS WHERE username LIKE $1;',
@@ -56,12 +56,10 @@ export const loginUser: RequestHandler = async (req:Request, res: Response, next
     try {
         debugger;
         const user = ( req.body as Login);
-        console.log(user);
         const derivedPwd = await pbkdf2Async(user.password, user.salt, 100000, 64,'sha512');
         const response:QueryResult = await pool.query('SELECT EXISTS ( SELECT DISTINCT * FROM users u WHERE username like $1 and "password" like $2 );',
             [user.username, derivedPwd]
         );
-        console.log(response);
         if (response.rows[0].exists) {
             return res.status(200).json({isLogged: true, message:'Server: Logged in', username: user.username});
         } else {

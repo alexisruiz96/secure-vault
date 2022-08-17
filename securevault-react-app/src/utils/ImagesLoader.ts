@@ -1,4 +1,4 @@
-import { ImageLoaderProps } from "../models/interfaces/interfaces";
+import { ImageLoaderProps } from "../models/interfaces/Interfaces";
 import copy_png from "../assets/copy.png";
 import doc_png from "../assets/doc.png";
 import file_download__png from "../assets/file-download.png";
@@ -10,7 +10,8 @@ import mpeg_png from "../assets/mpeg.png";
 import png_png from "../assets/png.png";
 import txt_png from "../assets/txt.png";
 
-
+// we could store this static path in an env variable
+export const imagePath = '/securevault-react-app/public/assets/';
 
 const images: ImageLoaderProps = {
     items: {

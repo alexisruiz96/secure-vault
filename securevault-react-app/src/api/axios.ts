@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { UserType } from '../models/interfaces/User';
-import * as CryptoUtil from '../modules/CryptoUtil'
+import * as CryptoUtil from '../modules/CryptoUtilsModule'
 
 interface User {
     username: string,
@@ -74,7 +74,7 @@ export const uploadData = async (formData: FormData): Promise<AxiosResponse> => 
   debugger;
   
   const response = await axios({
-      method: 'post', url: 'http://localhost:4000/api/files/upload', timeout:3000,
+      method: 'post', url: 'http://localhost:4000/files/upload', timeout:3000,
       data: formData,
       headers:{
         'Allow': 'POST', 'Content-Type': 'multipart/form-data',

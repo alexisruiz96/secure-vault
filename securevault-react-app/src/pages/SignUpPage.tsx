@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import * as CryptoUtil from '../modules/CryptoUtil'
+import * as CryptoUtil from '../modules/CryptoUtilsModule'
 import {useNavigate} from 'react-router-dom'
 import * as secureVaultApi from '../api/axios'
 import { User } from "../models/interfaces/User";

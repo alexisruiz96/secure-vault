@@ -10,19 +10,28 @@ const HomePage:React.FC = () => {
   
   const {user,logout} = useAuth();
   const [file, setFile] = useState<File | null>(null);
-  const [id, setId] = useState(null);
+  const [, setId] = useState(null);
   const [downloadPage, setDownloadPage] = useState(false);
+  const [uploadState, setUploadState] = useState<"Upload" | "Uploading" | "Upload Failed" | "Upload Successful" | null>("Upload");
 
   const handleUpload = async () => {
     
+    if(uploadState === "Uploading") return;
+    setUploadState("Uploading");
+    const formData = new FormData();
+    formData.append('newFile', file as File);
     try {
-      const formData = new FormData();
-      formData.append('file', file as File);
       const {data} = await uploadData(formData);
+      setId(data.id);
+      setDownloadPage(data.downloadPage);
       console.log(data);
+      setUploadState("Upload Successful");
+      // await new Promise(f => setTimeout(f, 1000));
+      //TODO make upload button disappear and download button appear
       
     } catch (error) {
       console.log(error);
+      setUploadState("Upload Failed");
     }
       
     
@@ -39,18 +48,29 @@ const HomePage:React.FC = () => {
             {
               file && (
 
-                <RenderFile file={{
-                  name: file?.name as string,
-                  sizeInBytes: file?.size,
-                  format: file?.type.split('/')[1] as string,
-                }}/>
+                <RenderFile 
+                  file={{
+                    name: file?.name as string,
+                    sizeInBytes: file?.size,
+                    format: file?.type.split('/')[1] as string,
+                  }
+                }/>
               )
             }
 
             {/* {file?.name} */}
           </div>
-          <button className="pt-6">Upload</button>
-          <button onClick={logout} className="pt-6">Logout</button>
+          <div >
+            <button className="pt-6" onClick={handleUpload}>{uploadState}</button>
+            <button className="pt-6" onClick={logout}>Logout</button>
+            <button className="pt-6 invisible" >Download</button>
+            
+            {
+              downloadPage && <div>
+                <a href={`${process.env.REACT_APP_BACKEND_URL}/${user.username}/download`}>Download</a>
+              </div>
+            }
+          </div>
         </div>
       }
     </div>
