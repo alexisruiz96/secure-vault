@@ -13,3 +13,4 @@ class User {
     }
 }
 exports.User = User;
+//# sourceMappingURL=userModel.js.map

@@ -1,16 +1,20 @@
-import {Router} from 'express';
+import { Router } from "express";
 
-import{ uploadFile, downloadFile, deleteFile } from '../controllers/filesController'
+import {
+  deleteFile,
+  downloadFile,
+  uploadFile,
+} from "../controllers/filesController";
 
 const filesRouter = Router();
 
-filesRouter.post('/',uploadFile);
+filesRouter.post("/upload", uploadFile);
 
-filesRouter.get('/',downloadFile);
+filesRouter.get("/download", downloadFile);
 
 // discuss if this is necessary
 // filesRouter.patch('/:id', updateFile);
 
-filesRouter.delete('/:id', deleteFile);
+filesRouter.delete("/delete/:id", deleteFile);
 
 export default filesRouter;
