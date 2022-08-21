@@ -14,7 +14,10 @@ const USERS = [];
 const uploadFile = (req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         debugger;
-        const fileData = req.body;
+        if (!req.file)
+            return res.status(400).json({ message: "No file uploaded" });
+        const { filename, mimetype, size } = req.file;
+        console.log(req.file);
         //TODO check if is there any existing file related to that user
         //TODO upload the encrypted data to Google Storage
         //TODO after this being done store the reference in the database
@@ -24,7 +27,8 @@ const uploadFile = (req, res, _next) => __awaiter(void 0, void 0, void 0, functi
         return res.status(201).json("File has been uploaded");
     }
     catch (error) {
-        return res.status(500).json("Error creating user due to " + error);
+        console.log(error);
+        return res.status(500).json("Server Error: " + error);
     }
 });
 exports.uploadFile = uploadFile;

@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../api/auth';
 import * as axios from '../api/axios';
 import MyDropzone from '../components/DropZone';
 import RenderFile from '../components/RenderFile';
+import { checkAppendedFormData } from "../utils/FormDataUtils";
 
 const HomePage: React.FC = () => {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     const { user, logout } = useAuth();
     const [file, setFile] = useState<File | null>(null);
@@ -20,20 +21,23 @@ const HomePage: React.FC = () => {
     const handleUpload = async () => {
         if (uploadState === "Uploading") return;
         setUploadState("Uploading");
-        const formData = new FormData();
-        formData.append("newFile", file as File);
+        const formData: FormData = new FormData();
+        formData.append("myFile", file as File);
+        checkAppendedFormData(formData);
         try {
             const { data } = await axios.uploadData(formData);
             setId(data.id);
             setDownloadPage(data.downloadPage);
             console.log(data);
             setUploadState("Upload Successful");
-            navigate("/" + user.username + "/download");
-            // await new Promise(f => setTimeout(f, 1000));
+            await new Promise(f => setTimeout(f, 1000));
+            setUploadState("Upload");
             //TODO make upload button disappear and download button appear
         } catch (error) {
             console.log(error);
             setUploadState("Upload Failed");
+            await new Promise(f => setTimeout(f, 1000));
+            setUploadState("Upload");
         }
     };
 

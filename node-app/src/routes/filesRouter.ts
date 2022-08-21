@@ -1,4 +1,5 @@
 import { Router } from "express";
+import multer from "multer";
 
 import {
   deleteFile,
@@ -8,7 +9,11 @@ import {
 
 const filesRouter = Router();
 
-filesRouter.post("/upload", uploadFile);
+const storage = multer.diskStorage({});
+
+let upload = multer({ storage: storage });
+
+filesRouter.post("/upload", upload.single("myFile"), uploadFile);
 
 filesRouter.get("/download", downloadFile);
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 
 //In the tutorial it shows how to create two different pages, one to see the link to
 // to go to the download page and one to go to the download page.

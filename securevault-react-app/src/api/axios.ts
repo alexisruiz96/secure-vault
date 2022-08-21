@@ -2,6 +2,7 @@ import axios, { AxiosResponse } from 'axios';
 
 import { UserType } from '../models/interfaces/User';
 import * as CryptoUtil from '../modules/CryptoUtilsModule';
+import { checkAppendedFormData } from '../utils/FormDataUtils';
 
 interface User {
     username: string;
@@ -85,6 +86,7 @@ export const uploadData = async (
     formData: FormData
 ): Promise<AxiosResponse> => {
     debugger;
+    checkAppendedFormData(formData);
     //TODO add try catch
     const response = await axios({
         method: "post",

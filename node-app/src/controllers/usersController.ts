@@ -84,9 +84,8 @@ export const loginUser: RequestHandler = async (
   res: Response,
   next
 ): Promise<Response> => {
-  debugger;
+  
   try {
-    debugger;
     const user = req.body as Login;
     const derivedPwd = await pbkdf2Async(
       user.password,

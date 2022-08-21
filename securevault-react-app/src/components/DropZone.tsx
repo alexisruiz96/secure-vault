@@ -3,7 +3,7 @@ import { Accept, useDropzone } from 'react-dropzone';
 
 import folder from '../assets/folder.png';
 
-const MyDropzone: React.FC<{ setFile: Dispatch<any> }> = ({ setFile }) => {
+const MyDropzone: React.FC<{ setFile: Dispatch<File> }> = ({ setFile }) => {
     const acceptedFileTypes: Accept = {
         "image/png": [".png"],
     };

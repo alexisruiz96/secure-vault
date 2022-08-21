@@ -16,7 +16,11 @@ export const uploadFile: RequestHandler = async (
 ): Promise<Response> => {
   try {
     debugger;
-    const fileData = req.body as File;
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+
+    const { filename, mimetype, size } = req.file;
+    console.log(req.file);
+    
 
     //TODO check if is there any existing file related to that user
     //TODO upload the encrypted data to Google Storage
@@ -27,7 +31,8 @@ export const uploadFile: RequestHandler = async (
 
     return res.status(201).json("File has been uploaded");
   } catch (error) {
-    return res.status(500).json("Error creating user due to " + error);
+    console.log(error);
+    return res.status(500).json("Server Error: " + error);
   }
 };
 

@@ -80,9 +80,7 @@ const getSalt = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
 });
 exports.getSalt = getSalt;
 const loginUser = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    debugger;
     try {
-        debugger;
         const user = req.body;
         const derivedPwd = yield pbkdf2Async(user.password, user.salt, 100000, 64, "sha512");
         const response = yield database_1.pool.query('SELECT EXISTS ( SELECT DISTINCT * FROM users u WHERE username like $1 and "password" like $2 );', [user.username, derivedPwd]);

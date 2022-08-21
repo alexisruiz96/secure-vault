@@ -21,14 +21,6 @@ const App: React.FC = () => {
                     />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/signup" element={<SignUpPage />} />
-                    <Route
-                        path="/:username/download"
-                        element={
-                            <ProtectedRoute>
-                                <HomePage />
-                            </ProtectedRoute>
-                        }
-                    />
                     <Route path="*" element={<h1>404 Not found</h1>} />
                 </Routes>
             </AuthProvider>
