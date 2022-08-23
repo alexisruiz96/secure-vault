@@ -1,13 +1,28 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
+import path from "path";
 import { pbkdf2 } from "pbkdf2";
 import { QueryResult } from "pg";
+import { createReadStream, createWriteStream } from "fs";
 
+import { Storage } from "@google-cloud/storage";
 import * as base64 from "@juanelas/base64";
 
 import { pool } from "../database";
 import { pbkdf2Async } from "../utils/pbkdf2Async";
 
 const USERS: File[] = [];
+
+const gc = new Storage({
+  keyFilename: path.join(
+    __dirname,
+    "../../secure-vault-360217-623afffad8b7.json"
+  ),
+  projectId: "secure-vault-360217",
+});
+
+gc.getBuckets().then((results) => console.log(results));
+
+const bucket = gc.bucket("secure_vault_files");
 
 export const uploadFile: RequestHandler = async (
   req: Request,
@@ -20,7 +35,16 @@ export const uploadFile: RequestHandler = async (
 
     const { filename, mimetype, size } = req.file;
     console.log(req.file);
-    
+      
+    createReadStream(req.file.path).pipe(
+      bucket.file(filename).createWriteStream({
+        gzip: true,
+        resumable: false,
+      })
+      .on("error", (err) => console.log(err)).on("finish", () => {
+        console.log("done");
+      })
+    );
 
     //TODO check if is there any existing file related to that user
     //TODO upload the encrypted data to Google Storage

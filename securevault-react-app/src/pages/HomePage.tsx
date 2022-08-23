@@ -22,6 +22,8 @@ const HomePage: React.FC = () => {
         if (uploadState === "Uploading") return;
         setUploadState("Uploading");
         const formData: FormData = new FormData();
+        //TODO encrypt file before uploading
+        
         formData.append("myFile", file as File);
         checkAppendedFormData(formData);
         try {

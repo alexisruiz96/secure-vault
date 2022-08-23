@@ -1,11 +1,7 @@
-import { Router } from "express";
-import multer from "multer";
+import { Router } from 'express';
+import multer from 'multer';
 
-import {
-  deleteFile,
-  downloadFile,
-  uploadFile,
-} from "../controllers/filesController";
+import { deleteFile, downloadFile, uploadFile } from '../controllers/filesController';
 
 const filesRouter = Router();
 
