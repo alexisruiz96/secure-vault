@@ -83,7 +83,7 @@ export const login = async (user: UserType): Promise<AxiosResponse> => {
 };
 
 export const uploadData = async (
-    formData: FormData
+    formData: FormData, username: string
 ): Promise<AxiosResponse> => {
     debugger;
     checkAppendedFormData(formData);
@@ -91,11 +91,12 @@ export const uploadData = async (
     const response = await axios({
         method: "post",
         url: "http://localhost:4000/files/upload",
-        timeout: 3000,
+        timeout: 10000,
         data: formData,
         headers: {
             Allow: "POST",
             "Content-Type": "multipart/form-data",
+            username: username,
         },
     });
 

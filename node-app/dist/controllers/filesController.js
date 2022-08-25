@@ -13,9 +13,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteFile = exports.downloadFile = exports.uploadFile = void 0;
-const path_1 = __importDefault(require("path"));
 const fs_1 = require("fs");
+const path_1 = __importDefault(require("path"));
+const promises_1 = require("stream/promises");
 const storage_1 = require("@google-cloud/storage");
+const database_1 = require("../database");
 const USERS = [];
 const gc = new storage_1.Storage({
     keyFilename: path_1.default.join(__dirname, "../../secure-vault-360217-623afffad8b7.json"),
@@ -30,24 +32,30 @@ const uploadFile = (req, res, _next) => __awaiter(void 0, void 0, void 0, functi
             return res.status(400).json({ message: "No file uploaded" });
         const { filename, mimetype, size } = req.file;
         console.log(req.file);
-        // await bucket.upload(req.file.path, {
-        //   destination: filename,
-        //   gzip: true,
-        //   resumable: false,
-        // });
-        (0, fs_1.createReadStream)(req.file.path).pipe(bucket.file(filename).createWriteStream({
-            gzip: true,
-            resumable: false,
-        }).on("error", (err) => console.log(err)).on("finish", () => {
-            console.log("done");
-        }));
+        // USE CASES defined in google Drive project file
         //TODO check if is there any existing file related to that user
         //TODO upload the encrypted data to Google Storage
-        //TODO after this being done store the reference in the database
-        // const response:QueryResult = await pool.query('INSERT INTO USERS (username, "password", epochtime, "data", salt, email) VALUES($1, $2, $3, $4, $5, $6);',
-        //     [fileData.username, fileData]
-        // );
-        return res.status(201).json("File has been uploaded");
+        yield (0, promises_1.pipeline)((0, fs_1.createReadStream)(req.file.path), bucket
+            .file(filename)
+            .createWriteStream({
+            gzip: true,
+            resumable: false,
+        })
+            .on("error", (err) => {
+            console.log(err);
+        })
+            .on("finish", () => __awaiter(void 0, void 0, void 0, function* () {
+            console.log("done");
+            try {
+                const response = yield database_1.pool.query("UPDATE USERS SET data=$1 WHERE username like $2", [filename, req.headers.username]);
+                res.status(201).json("File has been uploaded");
+            }
+            catch (error) {
+                res.status(500).json("Server Error: An error has occurred");
+            }
+            //TODO Get the timestamp data from the cloud and store it in the database
+        })));
+        return res;
     }
     catch (error) {
         console.log(error);

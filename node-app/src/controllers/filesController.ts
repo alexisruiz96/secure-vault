@@ -1,14 +1,15 @@
-import { NextFunction, Request, RequestHandler, Response } from "express";
-import path from "path";
-import { pbkdf2 } from "pbkdf2";
-import { QueryResult } from "pg";
-import { createReadStream, createWriteStream } from "fs";
+import { NextFunction, Request, RequestHandler, Response } from 'express';
+import { createReadStream, createWriteStream } from 'fs';
+import path from 'path';
+import { pbkdf2 } from 'pbkdf2';
+import { QueryResult } from 'pg';
+import { pipeline } from 'stream/promises';
 
-import { Storage } from "@google-cloud/storage";
-import * as base64 from "@juanelas/base64";
+import { Storage } from '@google-cloud/storage';
+import * as base64 from '@juanelas/base64';
 
-import { pool } from "../database";
-import { pbkdf2Async } from "../utils/pbkdf2Async";
+import { pool } from '../database';
+import { pbkdf2Async } from '../utils/pbkdf2Async';
 
 const USERS: File[] = [];
 
@@ -31,29 +32,44 @@ export const uploadFile: RequestHandler = async (
 ): Promise<Response> => {
   try {
     debugger;
+
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
 
     const { filename, mimetype, size } = req.file;
     console.log(req.file);
-      
-    createReadStream(req.file.path).pipe(
-      bucket.file(filename).createWriteStream({
-        gzip: true,
-        resumable: false,
-      })
-      .on("error", (err) => console.log(err)).on("finish", () => {
-        console.log("done");
-      })
-    );
-
+    
+    // USE CASES defined in google Drive project file
     //TODO check if is there any existing file related to that user
     //TODO upload the encrypted data to Google Storage
-    //TODO after this being done store the reference in the database
-    // const response:QueryResult = await pool.query('INSERT INTO USERS (username, "password", epochtime, "data", salt, email) VALUES($1, $2, $3, $4, $5, $6);',
-    //     [fileData.username, fileData]
-    // );
 
-    return res.status(201).json("File has been uploaded");
+    await pipeline(
+      createReadStream(req.file.path),
+      bucket
+      .file(filename)
+      .createWriteStream({
+          gzip: true,
+          resumable: false,
+        })
+        .on("error", (err) => {
+          
+          console.log(err)})
+        .on("finish", async () => {
+          console.log("done");
+          try {
+            const response: QueryResult = await pool.query(
+              "UPDATE USERS SET data=$1 WHERE username like $2",
+              [filename, req.headers.username]
+            );
+            res.status(201).json("File has been uploaded");
+          } catch (error) {
+            res.status(500).json("Server Error: An error has occurred");
+          }
+
+          //TODO Get the timestamp data from the cloud and store it in the database
+        })
+    );
+
+    return res;
   } catch (error) {
     console.log(error);
     return res.status(500).json("Server Error: " + error);

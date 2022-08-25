@@ -15,7 +15,7 @@ const HomePage: React.FC = () => {
     const [, setId] = useState(null);
     const [downloadPage, setDownloadPage] = useState(false);
     const [uploadState, setUploadState] = useState<
-        "Upload" | "Uploading" | "Upload Failed" | "Upload Successful" | null
+        "Upload" | "Uploading" | "Upload Failed" | "Upload Successful" | "Upload New File" | null
     >("Upload");
 
     const handleUpload = async () => {
@@ -27,13 +27,13 @@ const HomePage: React.FC = () => {
         formData.append("myFile", file as File);
         checkAppendedFormData(formData);
         try {
-            const { data } = await axios.uploadData(formData);
+            const { data } = await axios.uploadData(formData,user.username);
             setId(data.id);
             setDownloadPage(data.downloadPage);
             console.log(data);
             setUploadState("Upload Successful");
             await new Promise(f => setTimeout(f, 1000));
-            setUploadState("Upload");
+            setUploadState("Upload New File");
             //TODO make upload button disappear and download button appear
         } catch (error) {
             console.log(error);
