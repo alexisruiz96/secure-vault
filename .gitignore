@@ -2,9 +2,15 @@ main/node_modules/*
 main/.env
 /testing-ground/node_modules/*
 securevault-react-app/node_modules/*
+securevault-react-app/dist/*
 testing-ground/nodejs/node_modules/*
 testing-ground/react/node_modules/*
 testing-ground/typescript/nodejs/node_modules/*
 testing-ground/typescript/react/my-app/node_modules/*
 testing-ground/typescript/understand-ts_new/node_modules/*
 .vscode/*
+node-app/node_modules/*
+disableCORS/*
+node-app/dist/*
+node-app/secure-vault-360217-623afffad8b7.json
+node-app/.env

@@ -1,18 +1,21 @@
-import { NextFunction, Request, RequestHandler, Response } from "express";
+import { Request, RequestHandler, Response } from "express";
 import { pbkdf2 } from "pbkdf2";
 import { QueryResult } from "pg";
+import * as jwt from "jsonwebtoken";
+import { jwtSecret } from "../utils/config";
 
 import * as base64 from "@juanelas/base64";
 
 import { pool } from "../database";
 import { Login, User as User, UserName } from "../models/userModel";
+import { i18n } from "../i18n/i18n";
 
 const USERS: User[] = [];
 
 export const createUser: RequestHandler = async (
   req: Request,
   res: Response,
-  next
+  _next
 ): Promise<Response> => {
   try {
     debugger;
@@ -28,14 +31,14 @@ export const createUser: RequestHandler = async (
       return res.status(500).send(derivedPwd.message);
     }
     const data = user.data !== "" ? user.data : null;
-    const response: QueryResult = await pool.query(
+    await pool.query(
       'INSERT INTO USERS (username, "password", epochtime, "data", salt, email) VALUES($1, $2, $3, $4, $5, $6);',
       [user.username, derivedPwd, user.epochtime, data, user.salt, user.email]
     );
 
-    return res.status(201).json("User has been created");
+    return res.status(201).json(i18n.userSuccessCreated);
   } catch (error) {
-    return res.status(500).json("Error creating user due to " + error);
+    return res.status(500).json(i18n.errorServerCreatingUser);
   }
 };
 
@@ -56,7 +59,7 @@ const pbkdf2Async = async (
 export const getSalt: RequestHandler = async (
   req: Request,
   res: Response,
-  next
+  _next
 ): Promise<Response> => {
   try {
     const user = req.query as UserName;
@@ -66,25 +69,22 @@ export const getSalt: RequestHandler = async (
       [user.username]
     );
 
-    return res
-      .status(200)
-      .json({
-        salt: response.rows[0].salt,
-        message: "Server: Solve the challenge",
-      });
+    return res.status(200).json({
+      salt: response.rows[0].salt,
+      message: i18n.serverChallenge,
+    });
   } catch (error) {
     return res
       .status(500)
-      .json({ isLogged: false, message: "Error with the username" });
+      .json({ isLogged: false, message: i18n.errorUsername });
   }
 };
 
 export const loginUser: RequestHandler = async (
   req: Request,
   res: Response,
-  next
+  _next
 ): Promise<Response> => {
-  
   try {
     const user = req.body as Login;
     const derivedPwd = await pbkdf2Async(
@@ -99,42 +99,45 @@ export const loginUser: RequestHandler = async (
       [user.username, derivedPwd]
     );
     if (response.rows[0].exists) {
-      return res
-        .status(200)
-        .json({
-          isLogged: true,
-          message: "Server: Logged in",
-          username: user.username,
-        });
+      //TODO extract jwt generation to a function
+      const token = generateJwt(user);
+
+      // Set jwt into a cookie
+      res.cookie("auth", token, {
+        httpOnly: true,
+        secure: true,
+      });
+
+      return res.status(200).json({
+        isLogged: true,
+        message: "Server: Logged in",
+        username: user.username,
+      });
     } else {
-      return res
-        .status(500)
-        .json({
-          isLogged: false,
-          message: "Server: Error with the username or password.",
-        });
+      return res.status(500).json({
+        isLogged: false,
+        message: i18n.loginError,
+      });
     }
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        isLogged: false,
-        message: "Server: Error with the username or password.",
-      });
+    return res.status(500).json({
+      isLogged: false,
+      message: i18n.loginError,
+    });
   }
 };
 
+
 export const getUsers: RequestHandler = async (
-  req: Request,
+  _req: Request,
   res: Response,
-  next
+  _next
 ): Promise<Response> => {
   try {
     const response: QueryResult = await pool.query("SELECT * FROM USERS");
-    const result = response.rows[0].username;
     return res.status(200).json({ users: response.rows });
   } catch (error) {
-    return res.status(500).json("Internal Server Error");
+    return res.status(500).json(i18n.serverInternalError);
   }
 };
 
@@ -144,17 +147,20 @@ export const getUsers: RequestHandler = async (
 export const getUserById: RequestHandler<{ id: string }> = async (
   req: Request,
   res: Response,
-  next
-): Promise<Response> => {
+  _next
+  ): Promise<Response> => {
   try {
     const response: QueryResult = await pool.query(
       "SELECT * FROM USERS WHERE id=$1",
       [req.params.id]
     );
-    const result = response.rows[0].username;
+
+    if (response.rows.length === 0) {
+      return res.status(404).json(i18n.userNotFound);
+    }
     return res.status(200).json({ users: response.rows });
   } catch (error) {
-    return res.status(500).json("Internal Server Error");
+    return res.status(500).json(i18n.serverInternalError);
   }
 };
 
@@ -162,12 +168,12 @@ export const getUserById: RequestHandler<{ id: string }> = async (
 export const updateUser: RequestHandler<{ id: string }> = async (
   req: Request,
   res: Response,
-  next
-) => {
-  try {
-    const user = req.body as User;
-
-    await pool.query(
+  _next
+  ) => {
+    try {
+      const user = req.body as User;
+      
+      await pool.query(
       "UPDATE USERS SET username=$1, password=$2, epochtime=$3, data=$4, salt=$5 WHERE id=$6",
       [
         user.username,
@@ -177,11 +183,11 @@ export const updateUser: RequestHandler<{ id: string }> = async (
         user.salt,
         req.params.id,
       ]
-    );
-
-    return res.status(201).json("User has been modified");
+      );
+      
+    return res.status(201).json(i18n.userSuccessUpdated);
   } catch (error) {
-    return res.status(500).json("Error modifying user due to " + error);
+    return res.status(500).json();
   }
 };
 
@@ -189,15 +195,25 @@ export const updateUser: RequestHandler<{ id: string }> = async (
 export const deleteUser: RequestHandler<{ id: string }> = async (
   req: Request,
   res: Response,
-  next
+  _next
 ) => {
   try {
-    const user = req.body as User;
-
     await pool.query("DELETE FROM USERS WHERE id=$1", [req.params.id]);
 
-    return res.status(201).json("User has been deleted");
+    return res.status(201).json(i18n.userSuccessDeleted);
   } catch (error) {
-    return res.status(500).json("Error deleting user due to " + error);
+    return res.status(500).json(i18n.errorServerDeletingUser);
   }
+};
+
+const generateJwt = (user: Login) => {
+  const jwtClaims = {
+    sub: user.username,
+    iss: "localhost:4000",
+    aud: "localhost:4000",
+    exp: Math.floor(Date.now() / 1000) + 604800,
+    role: "user",
+  };
+
+  return jwt.sign(jwtClaims, jwtSecret);
 };

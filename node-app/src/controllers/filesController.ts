@@ -1,29 +1,28 @@
-import { NextFunction, Request, RequestHandler, Response } from 'express';
-import { createReadStream, createWriteStream } from 'fs';
+import { Request, RequestHandler, Response } from 'express';
+import { createReadStream} from 'fs';
 import path from 'path';
-import { pbkdf2 } from 'pbkdf2';
-import { QueryResult } from 'pg';
 import { pipeline } from 'stream/promises';
+import { SERVICE_ACCOUNT_KEY_FILE, GOOGLE_STORAGE_PROJECT_ID,GOOGLE_STORAGE_BUCKET_NAME, GOOGLE_STORAGE_BUCKET_URL } from "../utils/config";
 
 import { Storage } from '@google-cloud/storage';
-import * as base64 from '@juanelas/base64';
 
 import { pool } from '../database';
-import { pbkdf2Async } from '../utils/pbkdf2Async';
+import { i18n } from "../i18n/i18n";
 
 const USERS: File[] = [];
 
 const gc = new Storage({
   keyFilename: path.join(
     __dirname,
-    "../../secure-vault-360217-623afffad8b7.json"
+    "../../",
+    SERVICE_ACCOUNT_KEY_FILE
   ),
-  projectId: "secure-vault-360217",
+  projectId: GOOGLE_STORAGE_PROJECT_ID,
 });
 
 gc.getBuckets().then((results) => console.log(results));
 
-const bucket = gc.bucket("secure_vault_files");
+const bucket = gc.bucket(GOOGLE_STORAGE_BUCKET_NAME);
 
 export const uploadFile: RequestHandler = async (
   req: Request,
@@ -33,7 +32,7 @@ export const uploadFile: RequestHandler = async (
   try {
     debugger;
 
-    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+    if (!req.file) return res.status(400).json({ message: i18n.fileNoFileUploaded });
 
     const { filename, mimetype, size } = req.file;
     console.log(req.file);
@@ -56,13 +55,18 @@ export const uploadFile: RequestHandler = async (
         .on("finish", async () => {
           console.log("done");
           try {
-            const response: QueryResult = await pool.query(
+            await pool.query(
               "UPDATE USERS SET data=$1 WHERE username like $2",
               [filename, req.headers.username]
             );
-            res.status(201).json("File has been uploaded");
+            res.status(201).json(
+              {
+                message: i18n.fileSuccessUploaded,
+                downloadActive: true,
+                downloadPage: `${GOOGLE_STORAGE_BUCKET_URL}${filename}?authuser=0`
+              });
           } catch (error) {
-            res.status(500).json("Server Error: An error has occurred");
+            res.status(500).json(i18n.errorServerUploadingFile);
           }
 
           //TODO Get the timestamp data from the cloud and store it in the database
@@ -89,9 +93,9 @@ export const downloadFile: RequestHandler<{ id: string }> = async (
     //     [user.username, user.password, user.epochtime, user.data, user.salt, req.params.id]
     // );
 
-    return res.status(201).json("File has been retrieved");
+    return res.status(201).json(i18n.fileSuccessDownloaded);
   } catch (error) {
-    return res.status(500).json("Error modifying file due to " + error);
+    return res.status(500).json(i18n.errorServerDownloadingFile);
   }
 };
 
@@ -107,8 +111,8 @@ export const deleteFile: RequestHandler<{ id: string }> = async (
     //     'DELETE data FROM USERS WHERE id=$1',[req.params.id]
     // );
 
-    return res.status(201).json("File has been deleted");
+    return res.status(201).json(i18n.fileSuccessDeleted);
   } catch (error) {
-    return res.status(500).json("Error deleting file due to " + error);
+    return res.status(500).json(i18n.errorServerDeletingFile);
   }
 };

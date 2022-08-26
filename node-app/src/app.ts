@@ -1,24 +1,27 @@
 import { json } from "body-parser";
-import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
-
 import filesRouter from "./routes/filesRouter";
 import usersRouter from "./routes/usersRouter";
+import { PORT } from "./utils/config";
+import { i18n } from "./i18n/i18n";
 
 const app = express();
 
 // Enables CORS for all requests
-// app.use(cors())
+import cors from "cors";
+app.use(cors())
 
 app.use(json());
 
 app.use("/users", usersRouter);
 app.use("/files", filesRouter);
 
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+
+
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({ message: err.message });
 });
 
-app.listen(4000, () => {
-  console.log("Server started on port ", 4000);
+app.listen(parseInt(PORT), () => {
+  console.log(i18n.serverStart, parseInt(PORT));
 });
