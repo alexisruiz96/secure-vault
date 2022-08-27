@@ -70,6 +70,9 @@ export const uploadFile: RequestHandler = async (
       .createWriteStream({
           gzip: true,
           resumable: false,
+          metadata: {
+            contentType: mimetype,
+          }
         })
         .on("error", (err) => {
           

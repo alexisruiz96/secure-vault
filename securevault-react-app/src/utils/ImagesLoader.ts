@@ -1,6 +1,6 @@
 import copy_png from '../assets/copy.png';
 import doc_png from '../assets/doc.png';
-import file_download__png from '../assets/file-download.png';
+import file_download_png from '../assets/file-download.png';
 import folder_png from '../assets/folder.png';
 import jpeg_png from '../assets/jpeg.png';
 import jpg_png from '../assets/jpg.png';
@@ -17,7 +17,7 @@ const images: ImageLoaderProps = {
     items: {
         copy: copy_png,
         doc: doc_png,
-        file_download: file_download__png,
+        file_download: file_download_png,
         folder: folder_png,
         jpeg: jpeg_png,
         jpg: jpg_png,

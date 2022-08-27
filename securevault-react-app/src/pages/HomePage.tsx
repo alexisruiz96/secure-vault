@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useAuth } from '../api/auth';
 import * as axios from '../api/axios';
 import MyDropzone from '../components/DropZone';
+import DownloadFile from '../components/DownloadFile';
 import RenderFile from '../components/RenderFile';
 import { checkAppendedFormData } from "../utils/FormDataUtils";
 
@@ -18,6 +19,7 @@ const HomePage: React.FC = () => {
     const [uploadState, setUploadState] = useState<
         "Upload" | "Uploading" | "Upload Failed" | "Upload Successful" | "Upload New File" | null
     >("Upload");
+    const [isUploadActive, setIsUploadActive] = useState(true);
 
     const handleUpload = async () => {
         if (uploadState === "Uploading") return;
@@ -36,14 +38,20 @@ const HomePage: React.FC = () => {
             console.log(data);
             setUploadState("Upload Successful");
             await new Promise(f => setTimeout(f, 1000));
-            setUploadState("Upload New File");
+            setUploadState("Upload");
+            setIsUploadActive(false);
             //TODO make upload button disappear and download button appear
         } catch (error) {
             console.log(error);
             setUploadState("Upload Failed");
             await new Promise(f => setTimeout(f, 1000));
             setUploadState("Upload");
+            setIsUploadActive(true);
         }
+    };
+
+    const handleNewFile = () => {
+        setIsUploadActive(true);
     };
 
     return (
@@ -54,7 +62,12 @@ const HomePage: React.FC = () => {
                     <h2 className="text-center">
                         Welcome, <span>{user.username}</span>
                     </h2>
-                    <MyDropzone setFile={setFile} />
+                    {isUploadActive && (
+                        <MyDropzone setFile={setFile} />
+                    )}
+                    {!isUploadActive && (
+                        <DownloadFile />
+                    )}
                     <div className="w-full text-center">
                         {file && (
                             <RenderFile
@@ -66,12 +79,23 @@ const HomePage: React.FC = () => {
                             />
                         )}
 
-                        {/* {file?.name} */}
                     </div>
                     <div>
-                        <button className="pt-6" onClick={handleUpload}>
-                            {uploadState}
-                        </button>
+                        {
+                            isUploadActive && (
+                                <button className="pt-6" onClick={handleUpload}>
+                                    {uploadState}
+                                </button>
+                            ) 
+                        }
+                        {
+                            !isUploadActive && (
+                                <button className="pt-6" onClick={handleNewFile}>
+                                    Upload New File
+                                </button>
+                            ) 
+                        }
+                        {/* TODO Upload New File button to show the dropzone */}
                         {downloadActive && (
                             <a href={downloadPage as string}>
                                 <button className='pt-6'>

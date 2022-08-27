@@ -10,12 +10,15 @@ const MyDropzone: React.FC<{ setFile: Dispatch<File> }> = ({ setFile }) => {
     const inputFile = useRef<HTMLInputElement>(null);
     const onDrop = useCallback(
         (acceptedFiles: any) => {
-            console.log(acceptedFiles);
-            setFile(acceptedFiles[0]);
+            if(acceptedFiles.length > 0) {
+                console.log(acceptedFiles);
+                setFile(acceptedFiles[0]);
+            }
         },
         [setFile]
     );
-
+    
+    //TODO add file control to check when file has been selected
     const { getRootProps, getInputProps, isDragAccept, isDragReject } =
         useDropzone({
             onDrop,
