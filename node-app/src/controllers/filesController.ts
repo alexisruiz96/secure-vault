@@ -4,13 +4,14 @@ import path from 'path';
 import { pipeline } from 'stream/promises';
 import { SERVICE_ACCOUNT_KEY_FILE, GOOGLE_STORAGE_PROJECT_ID,GOOGLE_STORAGE_BUCKET_NAME, GOOGLE_STORAGE_BUCKET_URL } from "../utils/config";
 
-import { Storage } from '@google-cloud/storage';
+import { GetSignedUrlConfig, Storage } from '@google-cloud/storage';
 
 import { pool } from '../database';
 import { i18n } from "../i18n/i18n";
 
 const USERS: File[] = [];
 
+//TODO check this to make it global
 const gc = new Storage({
   keyFilename: path.join(
     __dirname,
@@ -22,7 +23,28 @@ const gc = new Storage({
 
 gc.getBuckets().then((results) => console.log(results));
 
-const bucket = gc.bucket(GOOGLE_STORAGE_BUCKET_NAME);
+const securevault_bucket = gc.bucket(GOOGLE_STORAGE_BUCKET_NAME);
+
+async function generateV4ReadSignedUrl(storage: Storage, bucketName: string, filename: string): Promise<string> {
+  // These options will allow temporary read access to the file
+  const options: GetSignedUrlConfig = {
+    version: 'v4',
+    action: "read",
+    expires: Date.now() + 15 * 60 * 1000, // 15 minutes
+  };
+
+  // Get a v4 signed URL for reading the file
+  const [url] = await storage
+    .bucket(bucketName)
+    .file(filename)
+    .getSignedUrl(options);
+    
+    console.log('Generated GET signed URL:');
+    console.log(url);
+
+  return url;
+}
+
 
 export const uploadFile: RequestHandler = async (
   req: Request,
@@ -43,7 +65,7 @@ export const uploadFile: RequestHandler = async (
 
     await pipeline(
       createReadStream(req.file.path),
-      bucket
+      securevault_bucket
       .file(filename)
       .createWriteStream({
           gzip: true,
@@ -59,11 +81,13 @@ export const uploadFile: RequestHandler = async (
               "UPDATE USERS SET data=$1 WHERE username like $2",
               [filename, req.headers.username]
             );
+            const signedUrl = await generateV4ReadSignedUrl(gc, GOOGLE_STORAGE_BUCKET_NAME, filename);
+            
             res.status(201).json(
               {
                 message: i18n.fileSuccessUploaded,
                 downloadActive: true,
-                downloadPage: `${GOOGLE_STORAGE_BUCKET_URL}${filename}?authuser=0`
+                downloadPage: signedUrl
               });
           } catch (error) {
             res.status(500).json(i18n.errorServerUploadingFile);

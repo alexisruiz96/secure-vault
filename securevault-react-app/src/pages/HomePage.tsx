@@ -12,8 +12,9 @@ const HomePage: React.FC = () => {
 
     const { user, logout } = useAuth();
     const [file, setFile] = useState<File | null>(null);
-    const [, setId] = useState(null);
-    const [downloadPage, setDownloadPage] = useState(false);
+    // const [, setId] = useState(null); //just necessary if we want to show all the files uploaded by the user
+    const [downloadActive, setDownloadActive] = useState(false);
+    const [downloadPage, setDownloadPage] = useState<string | null>(null);
     const [uploadState, setUploadState] = useState<
         "Upload" | "Uploading" | "Upload Failed" | "Upload Successful" | "Upload New File" | null
     >("Upload");
@@ -28,7 +29,9 @@ const HomePage: React.FC = () => {
         checkAppendedFormData(formData);
         try {
             const { data } = await axios.uploadData(formData,user.username);
-            setId(data.id);
+            debugger;
+            // setId(data.id); //just necessary if we want to show all the files uploaded by the user
+            setDownloadActive(data.downloadActive);
             setDownloadPage(data.downloadPage);
             console.log(data);
             setUploadState("Upload Successful");
@@ -56,9 +59,9 @@ const HomePage: React.FC = () => {
                         {file && (
                             <RenderFile
                                 file={{
-                                    name: file?.name as string,
+                                    name: file.name,
                                     sizeInBytes: file?.size,
-                                    format: file?.type.split("/")[1] as string,
+                                    format: file.type.split("/")[1],
                                 }}
                             />
                         )}
@@ -69,16 +72,19 @@ const HomePage: React.FC = () => {
                         <button className="pt-6" onClick={handleUpload}>
                             {uploadState}
                         </button>
+                        {downloadActive && (
+                            <a href={downloadPage as string}>
+                                <button className='pt-6'>
+                                    Download
+                                    {/* TODO SAVE URL IN ENV */}
+                                    {/* <a href={`${process.env.REACT_APP_BACKEND_URL}/${user.username}/download`}>Download</a> */}
+                                </button>
+                            </a>
+                        )}
                         <button className="pt-6" onClick={logout}>
                             Logout
                         </button>
-                        <button className="pt-6 invisible">Download</button>
 
-                        {downloadPage && (
-                            <div>
-                                {/* <a href={`${process.env.REACT_APP_BACKEND_URL}/${user.username}/download`}>Download</a> */}
-                            </div>
-                        )}
                     </div>
                 </div>
             }

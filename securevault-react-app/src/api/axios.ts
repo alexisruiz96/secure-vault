@@ -49,7 +49,7 @@ export const login = async (user: UserType): Promise<AxiosResponse> => {
     const saltResponse = await axios({
         method: "get",
         url: "http://localhost:4000/users/salt",
-        timeout: 3000,
+        timeout: 5000,
         params: {
             username: user.username,
         },
@@ -64,10 +64,10 @@ export const login = async (user: UserType): Promise<AxiosResponse> => {
         saltResponse.data.salt
     );
 
-    const response = await axios({
+    return axios({
         method: "post",
         url: "http://localhost:4000/users/login",
-        timeout: 3000,
+        timeout: 5000,
         data: {
             username: user.username,
             password: passwordScrypt.base64Pwd,
@@ -78,8 +78,6 @@ export const login = async (user: UserType): Promise<AxiosResponse> => {
             "Content-Type": "application/json",
         },
     });
-
-    return response;
 };
 
 export const uploadData = async (
@@ -88,7 +86,7 @@ export const uploadData = async (
     debugger;
     checkAppendedFormData(formData);
     //TODO add try catch
-    const response = await axios({
+    return axios({
         method: "post",
         url: "http://localhost:4000/files/upload",
         timeout: 10000,
@@ -99,10 +97,9 @@ export const uploadData = async (
             username: username,
         },
     });
-
-    return response;
 };
 
+/*
 export const getUsers = async (req: Request, res: Response) => {};
 
 export const getUserById = async (req: Request, res: Response) => {
@@ -117,3 +114,4 @@ export const getUserById = async (req: Request, res: Response) => {
 export const updateUser = async (req: Request, res: Response) => {};
 
 export const deleteUser = async (req: Request, res: Response) => {};
+*/
