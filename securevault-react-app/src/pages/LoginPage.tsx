@@ -1,29 +1,41 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { AuthContextType, useAuth } from '../api/auth';
+import { useAuth } from '../api/auth';
+import { IUserLogin } from '../models/interfaces/Interfaces';
+import * as secureVaultApi from "../api/axios";
+import * as CryptoUtil from "../modules/CryptoUtils";
 
-interface User {
-    username: string;
-    email: string;
-    password: string;
-}
+
 
 const LoginPage: React.FC = () => {
+    const navigate = useNavigate();
+    const { login, isAuthenticated } = useAuth();
+
     const [details, setDetails] = useState({
         username: "",
         email: "",
         password: "",
     });
     const [error, setError] = useState("");
-    const navigate = useNavigate();
-    const { login, isAuthenticated } = useAuth() as AuthContextType;
 
-    const Login = async (details: User) => {
+    const Login = async () => {
         debugger;
+        const saltResponse = await secureVaultApi.getUserSalt(details.username);
 
-        await login(details);
-        console.log(details);
+        const passwordScrypt = await CryptoUtil.generateKey(
+            details.password,
+            saltResponse.data.salt
+        );
+
+        const loginUser: IUserLogin = {
+            username: details.username,
+            salt: saltResponse.data.salt,
+            password: passwordScrypt.base64Pwd,
+        };
+
+
+        await login(loginUser);
 
         if (isAuthenticated) {
             console.log("Logged in!");
@@ -35,7 +47,7 @@ const LoginPage: React.FC = () => {
 
     const submitHandler = (event: React.FormEvent) => {
         event.preventDefault();
-        Login(details);
+        Login();
     };
 
     return (

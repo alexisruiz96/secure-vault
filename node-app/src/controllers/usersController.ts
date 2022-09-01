@@ -42,20 +42,6 @@ export const createUser: RequestHandler = async (
   }
 };
 
-const pbkdf2Async = async (
-  password: string,
-  salt: string,
-  iterations: number,
-  keylen: number,
-  digest: string
-): Promise<Error | string> => {
-  return new Promise((res, rej) => {
-    pbkdf2(password, salt, iterations, keylen, digest, (err, derivedKey) => {
-      err ? rej(err) : res(base64.encode(derivedKey, true, false));
-    });
-  });
-};
-
 export const getSalt: RequestHandler = async (
   req: Request,
   res: Response,
@@ -99,7 +85,6 @@ export const loginUser: RequestHandler = async (
       [user.username, derivedPwd]
     );
     if (response.rows[0].exists) {
-      //TODO extract jwt generation to a function
       const token = generateJwt(user);
 
       // Set jwt into a cookie
@@ -127,6 +112,34 @@ export const loginUser: RequestHandler = async (
   }
 };
 
+const pbkdf2Async = async (
+  password: string,
+  salt: string,
+  iterations: number,
+  keylen: number,
+  digest: string
+): Promise<Error | string> => {
+  return new Promise((res, rej) => {
+    pbkdf2(password, salt, iterations, keylen, digest, (err, derivedKey) => {
+      err ? rej(err) : res(base64.encode(derivedKey, true, false));
+    });
+  });
+};
+
+const generateJwt = (user: Login) => {
+  const jwtClaims = {
+    sub: user.username,
+    iss: "localhost:4000",
+    aud: "localhost:4000",
+    exp: Math.floor(Date.now() / 1000) + 604800,
+    role: "user",
+  };
+
+  return jwt.sign(jwtClaims, jwtSecret);
+};
+
+
+//BELLOW FUNCTIONS ARE NOT USED IN THE PROJECT FOR THE MOMENT//
 
 export const getUsers: RequestHandler = async (
   _req: Request,
@@ -141,7 +154,6 @@ export const getUsers: RequestHandler = async (
   }
 };
 
-//BELLOW FUNCTIONS ARE NOT USED IN THE PROJECT FOR THE MOMENT//
 
 //GET /users/:id
 export const getUserById: RequestHandler<{ id: string }> = async (
@@ -206,14 +218,3 @@ export const deleteUser: RequestHandler<{ id: string }> = async (
   }
 };
 
-const generateJwt = (user: Login) => {
-  const jwtClaims = {
-    sub: user.username,
-    iss: "localhost:4000",
-    aud: "localhost:4000",
-    exp: Math.floor(Date.now() / 1000) + 604800,
-    role: "user",
-  };
-
-  return jwt.sign(jwtClaims, jwtSecret);
-};

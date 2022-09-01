@@ -1,0 +1,21 @@
+@startuml Login
+actor User
+participant App
+participant Server
+database PostgreSQL
+
+' TODO: Add when it returns download file info to the user
+User -> App: Input Username and Password
+activate App
+App -> Server: Get Salt Request
+Server -> PostgreSQL: Get Salt Request for User
+Server <-- PostgreSQL: User Salt Response
+App <-- Server: User Salt Response
+App -> App: Execute kdf(user salt, derived pwd)
+App -> Server: POST {username, kdf(password, salt)}
+Server -> PostgreSQL: Check User/Password Request
+Server <-- PostgreSQL: Login Response
+App <-- Server: Login Response
+User <-- App: Login Response
+deactivate App
+@enduml

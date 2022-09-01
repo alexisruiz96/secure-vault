@@ -1,6 +1,25 @@
 @startuml Login
-User -> App: Authentication Request
-App -> Server: Login authentication Request
-App <-- Server: Login authentication Response
-User <-- App: Authentication Response
+!pragma teoz true
+
+box "Client" #LightBlue
+actor User
+participant App
+end box
+box "Server" #LightSalmon
+participant Server
+database PostgreSQL
+end box
+
+User -> App: Sign Up Request
+activate App
+App -> App: Execute scrypt(salt, derived pwd)
+{start} App -> Server: POST {username, email, kdf(derived_pwd), salt}
+Server -> Server: Execute pbkdf2(salt, kdf pwd)
+Server -> PostgreSQL: Save {username, email, kdf2(kdf pwd), salt}
+Server <-- PostgreSQL: User Created Response
+{end} App <-- Server: Server Response
+User <-- App: Sign Up Response
+deactivate App
+
+{start} <-> {end} : 5 seconds timeout
 @enduml

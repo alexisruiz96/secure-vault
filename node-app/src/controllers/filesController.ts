@@ -58,7 +58,7 @@ export const uploadFile: RequestHandler = async (
 
     const { filename, mimetype, size } = req.file;
     console.log(req.file);
-    
+    const filename_user = `${req.headers.username}_${filename}`; //set filename to username_filename
     // USE CASES defined in google Drive project file
     //TODO check if is there any existing file related to that user
     //TODO upload the encrypted data to Google Storage
@@ -66,7 +66,7 @@ export const uploadFile: RequestHandler = async (
     await pipeline(
       createReadStream(req.file.path),
       securevault_bucket
-      .file(filename)
+      .file(filename_user)
       .createWriteStream({
           gzip: true,
           resumable: false,
@@ -82,9 +82,9 @@ export const uploadFile: RequestHandler = async (
           try {
             await pool.query(
               "UPDATE USERS SET data=$1 WHERE username like $2",
-              [filename, req.headers.username]
+              [filename_user, req.headers.username]
             );
-            const signedUrl = await generateV4ReadSignedUrl(gc, GOOGLE_STORAGE_BUCKET_NAME, filename);
+            const signedUrl = await generateV4ReadSignedUrl(gc, GOOGLE_STORAGE_BUCKET_NAME, filename_user);
             
             res.status(201).json(
               {

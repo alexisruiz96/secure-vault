@@ -1,7 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 
-import { UserType } from '../models/interfaces/User';
-import * as CryptoUtil from '../modules/CryptoUtilsModule';
+import { IUserLogin } from "../models/interfaces/Interfaces";
 import { checkAppendedFormData } from '../utils/FormDataUtils';
 
 interface User {
@@ -14,9 +13,10 @@ interface User {
 }
 
 //TODO add this and test it to check it works
+//TODO handle this requests adding a jwt or some kind of token
 // axios.defaults.baseURL = "http://localhost:4000/";
 
-export const createUser = async (user: User): Promise<string> => {
+export const signUp = async (user: User): Promise<string> => {
     try {
         const response = await axios({
             method: "post",
@@ -43,26 +43,10 @@ export const createUser = async (user: User): Promise<string> => {
     return "";
 };
 
-export const login = async (user: UserType): Promise<AxiosResponse> => {
+export const login = async (user: IUserLogin): Promise<AxiosResponse> => {
     debugger;
-
-    const saltResponse = await axios({
-        method: "get",
-        url: "http://localhost:4000/users/salt",
-        timeout: 5000,
-        params: {
-            username: user.username,
-        },
-        headers: {
-            Allow: "GET",
-            "Content-Type": "application/json",
-        },
-    });
-
-    const passwordScrypt = await CryptoUtil.generateKey(
-        user.password,
-        saltResponse.data.salt
-    );
+    
+    //TODO move this to a utils file
 
     return axios({
         method: "post",
@@ -70,8 +54,8 @@ export const login = async (user: UserType): Promise<AxiosResponse> => {
         timeout: 5000,
         data: {
             username: user.username,
-            password: passwordScrypt.base64Pwd,
-            salt: saltResponse.data.salt,
+            password: user.password,
+            salt: user.salt,
         },
         headers: {
             Allow: "POST",
@@ -99,6 +83,21 @@ export const uploadData = async (
     });
 };
 
+
+export const getUserSalt = async (user: string) => {
+    return axios({
+        method: "get",
+        url: "http://localhost:4000/users/salt",
+        timeout: 5000,
+        params: {
+            username: user,
+        },
+        headers: {
+            Allow: "GET",
+            "Content-Type": "application/json",
+        },
+    });
+}
 /*
 export const getUsers = async (req: Request, res: Response) => {};
 

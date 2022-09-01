@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import * as secureVaultApi from '../api/axios';
 import { User } from '../models/interfaces/User';
-import * as CryptoUtil from '../modules/CryptoUtilsModule';
+import * as CryptoUtil from '../modules/CryptoUtils';
 
 const SignUpPage: React.FC = () => {
     const [details, setDetails] = useState({
@@ -14,7 +14,6 @@ const SignUpPage: React.FC = () => {
         salt: "",
         email: "",
     });
-    //const [, setUser] = useState({username:"", email: "", password:"", epochtime:0});
     const [error, setError] = useState("");
 
     const navigate = useNavigate();
@@ -36,7 +35,7 @@ const SignUpPage: React.FC = () => {
             user.password = password_crypto.base64Pwd;
             user.salt = password_crypto.base64Salt;
 
-            secureVaultApi.createUser(user);
+            secureVaultApi.signUp(user);
             navigate("/login");
         } else {
             console.log("Details do not match");

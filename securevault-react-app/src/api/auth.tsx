@@ -2,7 +2,7 @@ import { createContext, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import * as secureVaultApi from '../api/axios';
-import { UserType } from '../models/interfaces/User';
+import { IUserLogin } from "../models/interfaces/Interfaces";
 
 interface Props {
     children: React.ReactNode[] | React.ReactNode;
@@ -10,17 +10,17 @@ interface Props {
 
 export type AuthContextType = {
     isAuthenticated: boolean;
-    user: UserType;
-    login: (user: UserType) => void;
+    user: IUserLogin;
+    login: (user: IUserLogin) => void;
     logout: () => void;
     error: string;
 };
 
-const defaultUser = { username: "", password: "", email: "" };
+const defaultIUserLogin = { username: "", password: "", salt: "" };
 const defaultContext: AuthContextType = {
     isAuthenticated: false,
-    user: defaultUser,
-    login: (user: UserType) => {},
+    user: defaultIUserLogin,
+    login: (_user: IUserLogin) => {},
     logout: () => {},
     error: "",
 };
@@ -39,23 +39,23 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
-    const [user, setUser] = useState<UserType>({
+    const [user, setUser] = useState<IUserLogin>({
         username: "",
         password: "",
-        email: "",
+        salt: "",
     });
     const [error, setError] = useState("");
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const navigate = useNavigate();
 
-    const login = async (details: UserType) => {
+    const login = async (details: IUserLogin) => {
         debugger;
         const response = await secureVaultApi.login(details);
         if (response.status === 200) {
             setUser({
                 username: response.data.username,
                 password: "",
-                email: "",
+                salt: "",
             });
             setIsAuthenticated(true);
         } else {
@@ -65,7 +65,7 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
     };
 
     const logout = () => {
-        setUser(defaultUser);
+        setUser(defaultIUserLogin);
         navigate("/login");
     };
 

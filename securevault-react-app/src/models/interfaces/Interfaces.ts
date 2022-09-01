@@ -10,3 +10,9 @@ export interface ImageLoaderProps {
         [key: string]: string;
     };
 }
+
+export interface IUserLogin {
+    username: string;
+    password: string;
+    salt: string;
+}
