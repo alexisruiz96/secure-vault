@@ -6,11 +6,12 @@ import DownloadFile from '../components/DownloadFile';
 import MyDropzone from '../components/DropZone';
 import RenderFile from '../components/RenderFile';
 import { checkAppendedFormData } from '../utils/FormDataUtils';
+import * as CryptoUtil from "../modules/CryptoUtils";
 
 const HomePage: React.FC = () => {
     
     // SET VARIABLES
-    const { user, logout } = useAuth();
+    const { user, logout, encryptionKey } = useAuth();
     const [file, setFile] = useState<File | null>(null);
     // const [salt, setSalt] = useState<string | null>(null);
     //TODO if we want to show several files, add an array of ids or something similar
@@ -31,7 +32,8 @@ const HomePage: React.FC = () => {
         setUploadState("Uploading");
         const formData: FormData = new FormData();
         //TODO encrypt file before uploading
-
+        // const cryptoKey = await CryptoUtil.generateCryptoKey(encryptionKey.base64Pwd);
+        
         formData.append("myFile", file as File);
         checkAppendedFormData(formData);
         try {

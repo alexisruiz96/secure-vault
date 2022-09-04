@@ -16,3 +16,8 @@ export interface IUserLogin {
     password: string;
     salt: string;
 }
+
+export interface VaultKey {
+    base64Salt: string;
+    base64Pwd: string;
+}

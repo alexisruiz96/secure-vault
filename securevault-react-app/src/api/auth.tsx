@@ -2,7 +2,9 @@ import { createContext, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import * as secureVaultApi from '../api/axios';
-import { IUserLogin } from "../models/interfaces/Interfaces";
+import { IUserLogin, VaultKey } from "../models/interfaces/Interfaces";
+import * as CryptoUtil from "../modules/CryptoUtils";
+import { prefixSubKeys } from '../modules/config';
 
 interface Props {
     children: React.ReactNode[] | React.ReactNode;
@@ -13,6 +15,7 @@ export type AuthContextType = {
     user: IUserLogin;
     login: (user: IUserLogin) => void;
     logout: () => void;
+    encryptionKey: VaultKey;
     error: string;
 };
 
@@ -22,6 +25,7 @@ const defaultContext: AuthContextType = {
     user: defaultIUserLogin,
     login: (_user: IUserLogin) => {},
     logout: () => {},
+    encryptionKey: { base64Salt: "", base64Pwd: "" },
     error: "",
 };
 
@@ -46,18 +50,35 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
     });
     const [error, setError] = useState("");
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [encryptionKey, setEncryptionKey] = useState<VaultKey>({base64Salt: "", base64Pwd: ""});
     const navigate = useNavigate();
 
     const login = async (details: IUserLogin) => {
         debugger;
-        const response = await secureVaultApi.login(details);
+        const newDetails = { ...details };
+        const saltResponse = await secureVaultApi.getUserSalt(newDetails.username);
+        
+        const passwordScrypt = await CryptoUtil.generateKey(
+            prefixSubKeys.authKey + newDetails.password,
+            saltResponse.data.salt
+        );
+
+        
+        newDetails.salt = saltResponse.data.salt;
+        newDetails.password = passwordScrypt.base64Pwd;
+        
+        const response = await secureVaultApi.login(newDetails);
         if (response.status === 200) {
+            
             setUser({
                 username: response.data.username,
                 password: "",
                 salt: "",
             });
             setIsAuthenticated(true);
+
+            //Generate encryption key
+            generateEncryptionKey(details.password, saltResponse.data.salt);
         } else {
             setError(response.data);
             setIsAuthenticated(false);
@@ -69,9 +90,19 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
         navigate("/login");
     };
 
+    const generateEncryptionKey = async (password: string, salt:string) => {
+        CryptoUtil.generateKey(
+            prefixSubKeys.encKey + password,
+            salt
+        ).then((key) => {
+            setEncryptionKey({base64Salt: key.base64Salt, base64Pwd: key.base64Pwd});
+        });
+
+    }
+
     return (
         <AuthContext.Provider
-            value={{ isAuthenticated, user, login, logout, error }}
+            value={{ isAuthenticated, user, login, logout, error, encryptionKey }}
         >
             {children}
         </AuthContext.Provider>

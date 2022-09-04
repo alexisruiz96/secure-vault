@@ -5,6 +5,7 @@ import { useAuth } from '../api/auth';
 import { IUserLogin } from '../models/interfaces/Interfaces';
 import * as secureVaultApi from "../api/axios";
 import * as CryptoUtil from "../modules/CryptoUtils";
+import { prefixSubKeys } from '../modules/config';
 
 
 
@@ -19,19 +20,14 @@ const LoginPage: React.FC = () => {
     });
     const [error, setError] = useState("");
 
+
     const Login = async () => {
         debugger;
-        const saltResponse = await secureVaultApi.getUserSalt(details.username);
-
-        const passwordScrypt = await CryptoUtil.generateKey(
-            details.password,
-            saltResponse.data.salt
-        );
 
         const loginUser: IUserLogin = {
             username: details.username,
-            salt: saltResponse.data.salt,
-            password: passwordScrypt.base64Pwd,
+            salt: '',
+            password: details.password,
         };
 
 

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import * as secureVaultApi from '../api/axios';
 import { User } from '../models/interfaces/User';
 import * as CryptoUtil from '../modules/CryptoUtils';
+import { prefixSubKeys } from '../modules/config';
 
 const SignUpPage: React.FC = () => {
     const [details, setDetails] = useState({
@@ -28,7 +29,7 @@ const SignUpPage: React.FC = () => {
         console.log(details);
         if (details.password != null) {
             const password_crypto = await CryptoUtil.generateKey(
-                details.password,
+                prefixSubKeys.authKey + details.password,
                 null
             );
             let user = { ...details };
