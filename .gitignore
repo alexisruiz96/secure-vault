@@ -3,6 +3,8 @@ main/.env
 /testing-ground/node_modules/*
 securevault-react-app/node_modules/*
 securevault-react-app/dist/*
+securevault-react-app/.env
+```
 testing-ground/nodejs/node_modules/*
 testing-ground/react/node_modules/*
 testing-ground/typescript/nodejs/node_modules/*
@@ -20,3 +22,5 @@ node-app/dist/controllers/filesController.js.map
 node-app/dist/controllers/usersController.js
 node-app/dist/controllers/usersController.js.map
 node-app/dist/app.js
+node-app/dist/controllers/filesController.js
+node-app/dist/controllers/filesController.js.map

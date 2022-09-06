@@ -15,7 +15,7 @@ export type AuthContextType = {
     user: IUserLogin;
     login: (user: IUserLogin) => void;
     logout: () => void;
-    encryptionKey: VaultKey;
+    userCryptoKey: string;
     error: string;
 };
 
@@ -23,9 +23,9 @@ const defaultIUserLogin = { username: "", password: "", salt: "" };
 const defaultContext: AuthContextType = {
     isAuthenticated: false,
     user: defaultIUserLogin,
-    login: (_user: IUserLogin) => {},
-    logout: () => {},
-    encryptionKey: { base64Salt: "", base64Pwd: "" },
+    login: (_user: IUserLogin) => { /* TODO document why this method 'login' is empty */ },
+    logout: () => {/* TODO document why this method 'logout' is empty */},
+    userCryptoKey: "",
     error: "",
 };
 
@@ -50,7 +50,7 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
     });
     const [error, setError] = useState("");
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [encryptionKey, setEncryptionKey] = useState<VaultKey>({base64Salt: "", base64Pwd: ""});
+    const [userCryptoKey, setUserCryptoKey] = useState<string>("");
     const navigate = useNavigate();
 
     const login = async (details: IUserLogin) => {
@@ -94,15 +94,18 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
         CryptoUtil.generateKey(
             prefixSubKeys.encKey + password,
             salt
-        ).then((key) => {
-            setEncryptionKey({base64Salt: key.base64Salt, base64Pwd: key.base64Pwd});
+        ).then((key: VaultKey) => {
+            CryptoUtil.generateCryptoKey(key.base64Pwd)
+            .then((cryptoKeyRes: string) => {
+                setUserCryptoKey(cryptoKeyRes);
+            });
         });
 
     }
 
     return (
         <AuthContext.Provider
-            value={{ isAuthenticated, user, login, logout, error, encryptionKey }}
+            value={{ isAuthenticated, user, login, logout, error, userCryptoKey }}
         >
             {children}
         </AuthContext.Provider>

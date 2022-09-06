@@ -58,6 +58,7 @@ export const uploadFile: RequestHandler = async (
 
     const { filename, mimetype, size } = req.file;
     console.log(req.file);
+    //TODO add to the end of the file the original name
     const filename_user = `${req.headers.username}_${filename}`; //set filename to username_filename
     // USE CASES defined in google Drive project file
     //TODO check if is there any existing file related to that user
@@ -81,8 +82,8 @@ export const uploadFile: RequestHandler = async (
           console.log("done");
           try {
             await pool.query(
-              "UPDATE USERS SET data=$1 WHERE username like $2",
-              [filename_user, req.headers.username]
+              "UPDATE USERS SET data=$1, salt_data=$2 WHERE username like $3",
+              [filename_user, req.headers.saltdata, req.headers.username]
             );
             const signedUrl = await generateV4ReadSignedUrl(gc, GOOGLE_STORAGE_BUCKET_NAME, filename_user);
             

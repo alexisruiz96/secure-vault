@@ -5,13 +5,12 @@ import * as secureVaultApi from '../api/axios';
 import DownloadFile from '../components/DownloadFile';
 import MyDropzone from '../components/DropZone';
 import RenderFile from '../components/RenderFile';
+import * as CryptoUtil from '../modules/CryptoUtils';
 import { checkAppendedFormData } from '../utils/FormDataUtils';
-import * as CryptoUtil from "../modules/CryptoUtils";
 
 const HomePage: React.FC = () => {
-    
     // SET VARIABLES
-    const { user, logout, encryptionKey } = useAuth();
+    const { user, logout, userCryptoKey } = useAuth();
     const [file, setFile] = useState<File | null>(null);
     // const [salt, setSalt] = useState<string | null>(null);
     //TODO if we want to show several files, add an array of ids or something similar
@@ -31,15 +30,31 @@ const HomePage: React.FC = () => {
         if (uploadState === "Uploading") return;
         setUploadState("Uploading");
         const formData: FormData = new FormData();
-        //TODO encrypt file before uploading
-        // const cryptoKey = await CryptoUtil.generateCryptoKey(encryptionKey.base64Pwd);
-        
-        formData.append("myFile", file as File);
-        checkAppendedFormData(formData);
         try {
+            // ENCRYPT FILE BLOCK
+            const fileBinaryData = await file?.arrayBuffer();
+            const encryptedDataFileStringify = await CryptoUtil.encryptData(
+                userCryptoKey,
+                fileBinaryData as ArrayBuffer
+            );
+            const encryptedDataFileJSON = JSON.parse(encryptedDataFileStringify as string);
+            const encryptedDataBuffer = CryptoUtil.convertBase64ToBuffer(encryptedDataFileJSON[0]?.encryptedData);
+            const encryptedFile = new File(
+                [encryptedDataBuffer],
+                file?.name as string,
+                { type: file?.type},
+            );
+
+            formData.append("myFile", encryptedFile as File);
+            // END ENCRYPT FILE BLOCK
+
+            // formData.append("myFile", file as File);
+
+            checkAppendedFormData(formData);
             const { data } = await secureVaultApi.uploadData(
                 formData,
-                user.username
+                user.username,
+                encryptedDataFileJSON[0]?.iv
             );
             debugger;
             setDownloadActive(data.downloadActive);

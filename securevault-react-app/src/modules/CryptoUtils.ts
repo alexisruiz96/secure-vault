@@ -33,9 +33,8 @@ export const generateKey = async (password: string, iv: string | null) => {
 
     const base64Salt = convertBufferToBase64(salt);
     const base64Pwd = convertBufferToBase64(key);
-    //because we are going to use two salts we will store them in the database
-    //when we try to check the pwd we will need to decrypt with the salt from the server
-    //and after it with the salt of the
+
+    //TODO Check if it is needed to use a salt in the client side and in the server side
     //TODO change the way we store this information like and object and do it separately
     const encryptedObject = {
         base64Salt,
@@ -61,6 +60,7 @@ const generatePasswordHash = async (password: string): Promise<ArrayBuffer> => {
 /**
  * Generate CryptoKey object with SubtleCrypto
  * @param {string} keyData Key passed as string encoded with base64
+ * @returns {string} CryptoKey object stringified
  */
 export const generateCryptoKey = async (keyData: string) => {
     let keyDataDecoded: string | Uint8Array = convertBase64ToBuffer(keyData);
@@ -79,7 +79,6 @@ export const generateCryptoKey = async (keyData: string) => {
             true,
             actions
         );
-        console.log('Show CryptoKey'); console.log(cryptoKey)
         const exportedKey = await subtleCrypto.exportKey("jwk", cryptoKey);
         cryptoKeyGlobal = JSON.stringify(exportedKey);
         //console.log(cryptoKeyGlobal)
@@ -95,9 +94,8 @@ export const generateCryptoKey = async (keyData: string) => {
  * @param {string} cryptoKeyJwk
  * @returns {JSON} Returns IV and data encrypted
  */
-export const encryptData = async (cryptoKeyJwk: string, data: string) => {
+export const encryptData = async (cryptoKeyJwk: string, data: ArrayBuffer) => {
     const cryptoKey = await convertJwkToCryptoKey(cryptoKeyJwk, hashAlgUsed);
-    const ec = new TextEncoder();
 
     const iv = crypto.getRandomValues(new Uint8Array(12));
     let ciphertext: ArrayBuffer;
@@ -109,17 +107,16 @@ export const encryptData = async (cryptoKeyJwk: string, data: string) => {
                 iv,
             },
             cryptoKey,
-            ec.encode(data)
+            data
         );
-
+        
+        //TODO Check to return data as ArrayBuffer 
         const base64IV = convertBufferToBase64(iv);
         const base64Data = convertBufferToBase64(ciphertext);
         const encryptedObject = {
             base64IV,
             base64Data,
         };
-        console.log('Show parsed data to base 64')
-        console.log(JSON.stringify(encryptedObject))
         return formatEncryptedData(encryptedObject);
     } catch (error) {
         console.log("Error encrypting data: " + error);
@@ -128,35 +125,26 @@ export const encryptData = async (cryptoKeyJwk: string, data: string) => {
 };
 
 /**
- * Send password and decrypt the object if it's the right one
- * @param {string} password Send password to decrypt the data
+ * Pass JsonWebKey to CryptoKey and decrypt data
+ * @param {string} userCryptoKey JsonWebKey stringified
+ * @param {ArrayBuffer} encryptedData Encrypted binary data
+ * @param {string} dataIV used to encrypt data
  */
-export const decryptData = async (password: string, dataJSON: string) => {
-    //TODO change this to use the encryptKey and generate cryptoKey
-    const key = await generateKey(password, null);
-    const cryptoKeyJwk = await generateCryptoKey(key.base64Pwd);
-    const cryptoKey = await convertJwkToCryptoKey(cryptoKeyJwk, hashAlgUsed);
+export const decryptData = async (userCryptoKey: string, encryptedData: ArrayBuffer, dataIV: string) => {
 
-    // const dataBuffer = fs.readFileSync('encrypted.json')
-    // const dataJSON = dataBuffer.toString()
-    const encryptedObject = JSON.parse(dataJSON);
+    const cryptoKey = await convertJwkToCryptoKey(userCryptoKey, hashAlgUsed);
+    const iv = convertBase64ToBuffer(dataIV) as Uint8Array;
 
-    const iv = convertBase64ToBuffer(encryptedObject.base64IV);
-    const ciphertext = convertBase64ToBuffer(encryptedObject.base64Data);
-    if (iv instanceof Uint8Array && ciphertext instanceof Uint8Array) {
+    if (iv instanceof Uint8Array && encryptedData instanceof Uint8Array) {
         try {
-            const decryptedData = await subtleCrypto.decrypt(
+            return await subtleCrypto.decrypt(
                 {
                     name: "AES-GCM",
                     iv: iv,
                 },
                 cryptoKey,
-                ciphertext
+                encryptedData
             );
-            const dec = new TextDecoder();
-            const data = dec.decode(decryptedData);
-            console.log("Decrypted data: " + data);
-            return data;
         } catch (error) {
             debugger;
             let errorMessage = "Failed authentication.";
@@ -174,43 +162,18 @@ export const decryptData = async (password: string, dataJSON: string) => {
     }
 };
 
-//TODO Review this function 28/08/2022
-/**
- * Check password introduced with the existing one in the database
- * @param {string} dbPassword
- * @param {string} formPassword
- * @returns {boolean}
- */
-export const checkPassword = async (
-    formPassword: string,
-    dbPassword: string
-): Promise<boolean> => {
-    const encoder = new TextEncoder();
-    const data: Uint8Array = encoder.encode(formPassword);
-    const hashedPassword: ArrayBuffer = await subtleCrypto.digest(
-        "SHA-256",
-        data
-    );
-    const hashBase64: string = convertBufferToBase64(hashedPassword);
-    const hashedPasswordFromDecryptedData = await decryptData(
-        formPassword,
-        dbPassword
-    );
-    return hashedPasswordFromDecryptedData === hashBase64;
-};
-
 export const convertBufferToBase64 = (data: ArrayBuffer) => {
     return base64.encode(data, true, false);
 };
 
-const convertBase64ToBuffer = (data: string) => {
+export const convertBase64ToBuffer = (data: string) => {
     return base64.decode(data);
 };
 
 /**
  * Import CryptoKey in jwk format
  * format, keyData, algorithm, extractable, keyUsages
- * @param {*} jwk JSON Web Key
+ * @param {string} jwk JSON Web Key
  * @param {string} algorithm
  */
 const convertJwkToCryptoKey = async (jwk: string, algorithm: string) => {

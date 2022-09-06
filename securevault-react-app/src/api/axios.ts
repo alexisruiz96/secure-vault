@@ -65,7 +65,7 @@ export const login = async (user: IUserLogin): Promise<AxiosResponse> => {
 };
 
 export const uploadData = async (
-    formData: FormData, username: string
+    formData: FormData, username: string, saltdata: string
 ): Promise<AxiosResponse> => {
     debugger;
     checkAppendedFormData(formData);
@@ -79,6 +79,7 @@ export const uploadData = async (
             Allow: "POST",
             "Content-Type": "multipart/form-data",
             username: username,
+            saltdata: saltdata,
         },
     });
 };
