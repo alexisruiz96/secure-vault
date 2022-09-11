@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
 
-import { deleteFile, downloadFile, uploadFile } from '../controllers/filesController';
+import { deleteFile, downloadFile, uploadFile, getDataSalt } from '../controllers/filesController';
 
 const filesRouter = Router();
 
@@ -12,6 +12,8 @@ let upload = multer({ storage: storage });
 filesRouter.post("/upload", upload.single("myFile"), uploadFile);
 
 filesRouter.get("/download", downloadFile);
+
+filesRouter.get("/salt", getDataSalt);
 
 // discuss if this is necessary
 // filesRouter.patch('/:id', updateFile);

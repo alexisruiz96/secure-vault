@@ -1,8 +1,12 @@
 @startuml Login
+box "Client" #LightBlue
 actor User
 participant App
+end box
+box "Server" #LightSalmon
 participant Server
 database PostgreSQL
+end box
 
 ' TODO: Add when it returns download file info to the user
 User -> App: Input Username and Password

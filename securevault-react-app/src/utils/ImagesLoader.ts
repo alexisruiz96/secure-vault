@@ -8,7 +8,7 @@ import mp3_png from '../assets/mp3.png';
 import mpeg_png from '../assets/mpeg.png';
 import png_png from '../assets/png.png';
 import txt_png from '../assets/txt.png';
-import { ImageLoaderProps } from '../models/interfaces/Interfaces';
+import { ImageLoaderProps } from '../models/interfaces/interfaces';
 
 // we could store this static path in an env variable
 export const imagePath = "/securevault-react-app/public/assets/";

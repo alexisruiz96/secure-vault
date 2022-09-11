@@ -28,7 +28,7 @@ const MyDropzone: React.FC<{ setFile: Dispatch<File> }> = ({ setFile }) => {
     return (
         <div
             className={
-                "border-2 border-dashed border-gray-500 rounded-xl mb-5 hover:border-yellow-500 " +
+                "border-2 border-dashed border-gray-500 rounded-xl mb-5 hover:border-blue-500 " +
                 (isDragAccept ? " border-green-500" : "") +
                 (isDragReject ? " border-red-500" : "")
             }

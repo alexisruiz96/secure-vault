@@ -3,7 +3,6 @@ import { Router } from "express";
 import {
   createUser,
   deleteUser,
-  getSalt,
   getUsers,
   loginUser,
   updateUser,
@@ -12,8 +11,6 @@ import {
 const usersRouter = Router();
 
 usersRouter.post("/signup", createUser);
-
-usersRouter.get("/salt", getSalt);
 
 usersRouter.post("/login", loginUser);
 

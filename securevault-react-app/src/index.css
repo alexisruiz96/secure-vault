@@ -38,7 +38,7 @@ form:after{
     right: -5px;
     bottom: -5px;
     z-index: 1;
-    background-color: linear-gradient(to bottom right, #FFCE00, #FE4880);
+    background-color: linear-gradient(to bottom right, #00FFF2, #6948fe);
 }
 
 form .form-inner {
@@ -71,7 +71,7 @@ form .form-inner .form-group{
 }
 
 .form-inner .form-group:focus-within label {
-    color: #FE4880;
+    color: #6948fe;
 }
 
 form .form-inner .form-group input{
@@ -92,7 +92,7 @@ form .form-inner input[type="submit"],
     display: inline-block;
     padding: 10px 15px;
     border-radius: 8px;
-    background-image: linear-gradient(to right, #FFCE00 50%,#FFCE00 50%, #FE4880);
+    background-image: linear-gradient(to right, #00FFF2 50%,#00FFF2 50%, #6948fe);
     background-size: 200%;
     background-position:  0%;
     transition: 0.4s;
@@ -124,6 +124,6 @@ button:hover {
 }
 
 .welcome h2 span{
-    color: #FE4880;
+    color: #6948fe;
     font-weight: 700;
 }

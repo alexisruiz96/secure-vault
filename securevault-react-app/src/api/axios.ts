@@ -1,33 +1,35 @@
 import axios, { AxiosResponse } from 'axios';
 
-import { IUserLogin } from "../models/interfaces/Interfaces";
+import { ILoginUser, User } from "../models/interfaces/interfaces";
 import { checkAppendedFormData } from '../utils/FormDataUtils';
-
-interface User {
-    username: string;
-    password: string;
-    epochtime: EpochTimeStamp;
-    data: string;
-    salt: string;
-    email: string;
-}
 
 //TODO add this and test it to check it works
 //TODO handle this requests adding a jwt or some kind of token
 // axios.defaults.baseURL = "http://localhost:4000/";
+// axios.defaults.headers.common['Authorization'] = AUTH_TOKEN;
+// axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
+
+//TODO: test this
+// export const axiosInstance = axios.create({
+//     baseURL: "http://localhost:4000/",
+//     headers: {
+//         'Content-Type': 'application/x-www-form-urlencoded',
+//     }
+// });
+
+const timeMax = 30000;
 
 export const signUp = async (user: User): Promise<string> => {
     try {
         const response = await axios({
             method: "post",
             url: "http://localhost:4000/users/signup",
-            timeout: 3000,
+            timeout: timeMax,
             data: {
                 username: user.username,
                 password: user.password,
                 epochtime: user.epochtime,
                 data: user.data,
-                salt: user.salt,
                 email: user.email,
             },
             headers: {
@@ -37,25 +39,22 @@ export const signUp = async (user: User): Promise<string> => {
         });
         console.log(response);
     } catch (error) {
-        console.log("Error creating user.");
+        console.error("Error creating user.");
     }
 
     return "";
 };
 
-export const login = async (user: IUserLogin): Promise<AxiosResponse> => {
-    debugger;
+export const login = async (user: ILoginUser): Promise<AxiosResponse> => {
     
-    //TODO move this to a utils file
-
     return axios({
         method: "post",
         url: "http://localhost:4000/users/login",
-        timeout: 5000,
+        timeout: timeMax,
         data: {
             username: user.username,
-            password: user.password,
-            salt: user.salt,
+            password: user.password
+            //TODO delete salt from server side login
         },
         headers: {
             Allow: "POST",
@@ -67,13 +66,13 @@ export const login = async (user: IUserLogin): Promise<AxiosResponse> => {
 export const uploadData = async (
     formData: FormData, username: string, saltdata: string
 ): Promise<AxiosResponse> => {
-    debugger;
+    
     checkAppendedFormData(formData);
     //TODO add try catch
     return axios({
         method: "post",
         url: "http://localhost:4000/files/upload",
-        timeout: 10000,
+        timeout: timeMax,
         data: formData,
         headers: {
             Allow: "POST",
@@ -84,12 +83,28 @@ export const uploadData = async (
     });
 };
 
+//TODO delete get user salt from server side
+// export const getUserSalt = async (user: string) => {
+//     return axios({
+//         method: "get",
+//         url: "http://localhost:4000/users/salt",
+//         timeout: 5000,
+//         params: {
+//             username: user,
+//         },
+//         headers: {
+//             Allow: "GET",
+//             "Content-Type": "application/json",
+//         },
+//     });
+// }
 
-export const getUserSalt = async (user: string) => {
+//TODO: add jwt to the authorization header
+export const getDataSalt = async (user: string) => {
     return axios({
         method: "get",
-        url: "http://localhost:4000/users/salt",
-        timeout: 5000,
+        url: "http://localhost:4000/files/salt",
+        timeout: timeMax,
         params: {
             username: user,
         },
@@ -99,6 +114,8 @@ export const getUserSalt = async (user: string) => {
         },
     });
 }
+
+//TODO: add functionality to this functions
 /*
 export const getUsers = async (req: Request, res: Response) => {};
 

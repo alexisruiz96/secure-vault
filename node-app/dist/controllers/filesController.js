@@ -12,14 +12,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteFile = exports.downloadFile = exports.uploadFile = void 0;
+exports.getDataSalt = exports.deleteFile = exports.downloadFile = exports.uploadFile = void 0;
 const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
 const promises_1 = require("stream/promises");
-const config_1 = require("../utils/config");
 const storage_1 = require("@google-cloud/storage");
 const database_1 = require("../database");
 const i18n_1 = require("../i18n/i18n");
+const config_1 = require("../utils/config");
 const USERS = [];
 //TODO check this to make it global
 const gc = new storage_1.Storage({
@@ -32,7 +32,7 @@ function generateV4ReadSignedUrl(storage, bucketName, filename) {
     return __awaiter(this, void 0, void 0, function* () {
         // These options will allow temporary read access to the file
         const options = {
-            version: 'v4',
+            version: "v4",
             action: "read",
             expires: Date.now() + 15 * 60 * 1000, // 15 minutes
         };
@@ -41,18 +41,18 @@ function generateV4ReadSignedUrl(storage, bucketName, filename) {
             .bucket(bucketName)
             .file(filename)
             .getSignedUrl(options);
-        console.log('Generated GET signed URL:');
+        console.log("Generated GET signed URL:");
         console.log(url);
         return url;
     });
 }
 const uploadFile = (req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        debugger;
         if (!req.file)
             return res.status(400).json({ message: i18n_1.i18n.fileNoFileUploaded });
         const { filename, mimetype, size } = req.file;
         console.log(req.file);
+        //TODO add to the end of the file the original name
         const filename_user = `${req.headers.username}_${filename}`; //set filename to username_filename
         // USE CASES defined in google Drive project file
         //TODO check if is there any existing file related to that user
@@ -64,7 +64,7 @@ const uploadFile = (req, res, _next) => __awaiter(void 0, void 0, void 0, functi
             resumable: false,
             metadata: {
                 contentType: mimetype,
-            }
+            },
         })
             .on("error", (err) => {
             console.log(err);
@@ -72,12 +72,12 @@ const uploadFile = (req, res, _next) => __awaiter(void 0, void 0, void 0, functi
             .on("finish", () => __awaiter(void 0, void 0, void 0, function* () {
             console.log("done");
             try {
-                yield database_1.pool.query("UPDATE USERS SET data=$1 WHERE username like $2", [filename_user, req.headers.username]);
+                yield database_1.pool.query("UPDATE USERS SET data=$1, salt_data=$2 WHERE username like $3", [filename_user, req.headers.saltdata, req.headers.username]);
                 const signedUrl = yield generateV4ReadSignedUrl(gc, config_1.GOOGLE_STORAGE_BUCKET_NAME, filename_user);
                 res.status(201).json({
                     message: i18n_1.i18n.fileSuccessUploaded,
                     downloadActive: true,
-                    downloadPage: signedUrl
+                    downloadPage: signedUrl,
                 });
             }
             catch (error) {
@@ -88,7 +88,7 @@ const uploadFile = (req, res, _next) => __awaiter(void 0, void 0, void 0, functi
         return res;
     }
     catch (error) {
-        console.log(error);
+        console.error(error);
         return res.status(500).json("Server Error: " + error);
     }
 });
@@ -96,10 +96,7 @@ exports.uploadFile = uploadFile;
 const downloadFile = (req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = req.body;
-        // await pool.query(
-        //     'UPDATE USERS SET username=$1, password=$2, epochtime=$3, data=$4, salt=$5 WHERE id=$6',
-        //     [user.username, user.password, user.epochtime, user.data, user.salt, req.params.id]
-        // );
+        //TODO add functionality to return the corresponding file to the user
         return res.status(201).json(i18n_1.i18n.fileSuccessDownloaded);
     }
     catch (error) {
@@ -120,4 +117,20 @@ const deleteFile = (req, res, _next) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.deleteFile = deleteFile;
+const getDataSalt = (req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = req.query;
+        const response = yield database_1.pool.query("SELECT salt_data FROM USERS WHERE username LIKE $1;", [user.username]);
+        return res.status(200).json({
+            salt: response.rows[0].salt_data,
+            message: i18n_1.i18n.serverChallenge,
+        });
+    }
+    catch (error) {
+        return res
+            .status(500)
+            .json({ isLogged: false, message: i18n_1.i18n.errorUsername });
+    }
+});
+exports.getDataSalt = getDataSalt;
 //# sourceMappingURL=filesController.js.map

@@ -32,24 +32,34 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.getUserById = exports.getUsers = exports.loginUser = exports.getSalt = exports.createUser = void 0;
-const pbkdf2_1 = require("pbkdf2");
+exports.deleteUser = exports.updateUser = exports.getUserById = exports.getUsers = exports.loginUser = exports.createUser = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
-const config_1 = require("../utils/config");
+const pbkdf2_1 = require("pbkdf2");
 const base64 = __importStar(require("@juanelas/base64"));
 const database_1 = require("../database");
 const i18n_1 = require("../i18n/i18n");
+const config_1 = require("../utils/config");
+const crypto = __importStar(require("crypto"));
 const USERS = [];
 const createUser = (req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         debugger;
         const user = req.body;
-        const derivedPwd = yield pbkdf2Async(user.password, user.salt, 100000, 64, "sha512");
+        const serverSalt = crypto.randomBytes(16);
+        const serverSaltString = base64.encode(serverSalt, true, false);
+        const derivedPwd = yield pbkdf2Async(user.password, serverSaltString, 100000, 64, "sha512");
         if (derivedPwd instanceof Error) {
             return res.status(500).send(derivedPwd.message);
         }
         const data = user.data !== "" ? user.data : null;
-        yield database_1.pool.query('INSERT INTO USERS (username, "password", epochtime, "data", salt, email) VALUES($1, $2, $3, $4, $5, $6);', [user.username, derivedPwd, user.epochtime, data, user.salt, user.email]);
+        yield database_1.pool.query('INSERT INTO USERS (username, "password", epochtime, "data", salt, email) VALUES($1, $2, $3, $4, $5, $6);', [
+            user.username,
+            derivedPwd,
+            user.epochtime,
+            data,
+            serverSaltString,
+            user.email,
+        ]);
         return res.status(201).json(i18n_1.i18n.userSuccessCreated);
     }
     catch (error) {
@@ -57,46 +67,28 @@ const createUser = (req, res, _next) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.createUser = createUser;
-const getSalt = (req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const user = req.query;
-        const response = yield database_1.pool.query("SELECT salt FROM USERS WHERE username LIKE $1;", [user.username]);
-        return res.status(200).json({
-            salt: response.rows[0].salt,
-            message: i18n_1.i18n.serverChallenge,
-        });
-    }
-    catch (error) {
-        return res
-            .status(500)
-            .json({ isLogged: false, message: i18n_1.i18n.errorUsername });
-    }
-});
-exports.getSalt = getSalt;
 const loginUser = (req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = req.body;
-        const derivedPwd = yield pbkdf2Async(user.password, user.salt, 100000, 64, "sha512");
+        const saltRes = yield database_1.pool.query('SELECT salt FROM USERS WHERE username = $1;', [user.username]);
+        if (saltRes.rowCount === 0 || saltRes.rows[0].salt === undefined)
+            throw Error;
+        //TODO retrieve salt from db
+        const derivedPwd = yield pbkdf2Async(user.password, saltRes.rows[0].salt, 100000, 64, "sha512");
         const response = yield database_1.pool.query('SELECT EXISTS ( SELECT DISTINCT * FROM users u WHERE username like $1 and "password" like $2 );', [user.username, derivedPwd]);
-        if (response.rows[0].exists) {
-            const token = generateJwt(user);
-            // Set jwt into a cookie
-            res.cookie("auth", token, {
-                httpOnly: true,
-                secure: true,
-            });
-            return res.status(200).json({
-                isLogged: true,
-                message: "Server: Logged in",
-                username: user.username,
-            });
-        }
-        else {
-            return res.status(500).json({
-                isLogged: false,
-                message: i18n_1.i18n.loginError,
-            });
-        }
+        if (response.rowCount === 0 || !response.rows[0].exists)
+            throw Error;
+        const token = generateJwt(user);
+        // Set jwt into a cookie
+        res.cookie("auth", token, {
+            httpOnly: true,
+            secure: true,
+        });
+        return res.status(200).json({
+            isLogged: true,
+            message: "Server: Logged in",
+            username: user.username,
+        });
     }
     catch (error) {
         return res.status(500).json({

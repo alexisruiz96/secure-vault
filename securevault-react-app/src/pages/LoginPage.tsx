@@ -2,12 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../api/auth';
-import { IUserLogin } from '../models/interfaces/Interfaces';
-import * as secureVaultApi from "../api/axios";
-import * as CryptoUtil from "../modules/CryptoUtils";
-import { prefixSubKeys } from '../modules/config';
-
-
+import { ILoginUser } from '../models/interfaces/interfaces';
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
@@ -20,17 +15,14 @@ const LoginPage: React.FC = () => {
     });
     const [error, setError] = useState("");
 
-
     const Login = async () => {
-        debugger;
 
-        const loginUser: IUserLogin = {
+        const loginUser: ILoginUser = {
             username: details.username,
-            salt: '',
             password: details.password,
         };
-
-
+        
+        //Note: async login function
         await login(loginUser);
 
         if (isAuthenticated) {
@@ -49,7 +41,7 @@ const LoginPage: React.FC = () => {
     return (
         <div className="App">
             <form onSubmit={submitHandler}>
-                <div className="form-inner">
+                <div className="form-inner rounded-md">
                     <h2>Login</h2>
                     {error !== "" ? <div className="error">{error}</div> : ""}
                     <div className="form-group">

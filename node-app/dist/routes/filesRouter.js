@@ -11,6 +11,7 @@ const storage = multer_1.default.diskStorage({});
 let upload = (0, multer_1.default)({ storage: storage });
 filesRouter.post("/upload", upload.single("myFile"), filesController_1.uploadFile);
 filesRouter.get("/download", filesController_1.downloadFile);
+filesRouter.get("/salt", filesController_1.getDataSalt);
 // discuss if this is necessary
 // filesRouter.patch('/:id', updateFile);
 filesRouter.delete("/delete/:id", filesController_1.deleteFile);

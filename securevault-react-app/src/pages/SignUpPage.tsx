@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import * as secureVaultApi from '../api/axios';
-import { User } from '../models/interfaces/User';
-import * as CryptoUtil from '../modules/CryptoUtils';
+import { User } from '../models/interfaces/interfaces';
 import { prefixSubKeys } from '../modules/config';
+import * as CryptoUtil from '../modules/CryptoUtils';
 
 const SignUpPage: React.FC = () => {
     const [details, setDetails] = useState({
@@ -12,7 +12,6 @@ const SignUpPage: React.FC = () => {
         password: "",
         epochtime: 0,
         data: "",
-        salt: "",
         email: "",
     });
     const [error, setError] = useState("");
@@ -25,16 +24,16 @@ const SignUpPage: React.FC = () => {
         SignUp(details);
     };
 
+    //TODO: change password name to authKey
     const SignUp = async (details: User) => {
         console.log(details);
         if (details.password != null) {
-            const password_crypto = await CryptoUtil.generateKey(
+            const authKey = await CryptoUtil.generateKey(
                 prefixSubKeys.authKey + details.password,
-                null
+                true
             );
             let user = { ...details };
-            user.password = password_crypto.base64Pwd;
-            user.salt = password_crypto.base64Salt;
+            user.password = authKey as string;
 
             secureVaultApi.signUp(user);
             navigate("/login");
@@ -47,7 +46,7 @@ const SignUpPage: React.FC = () => {
     return (
         <form onSubmit={submitHandler}>
             <div className="App">
-                <div className="form-inner">
+                <div className="form-inner rounded-md">
                     <h2>Sign Up</h2>
                     {error !== "" ? <div className="error">{error}</div> : ""}
                     <div className="form-group">

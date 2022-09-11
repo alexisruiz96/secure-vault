@@ -1,3 +1,10 @@
+export interface User {
+    username: string;
+    password: string;
+    epochtime: EpochTimeStamp;
+    data: string;
+    email: string;
+}
 export interface IFile {
     name: string;
     sizeInBytes: number;
@@ -11,13 +18,7 @@ export interface ImageLoaderProps {
     };
 }
 
-export interface IUserLogin {
+export interface ILoginUser {
     username: string;
     password: string;
-    salt: string;
-}
-
-export interface VaultKey {
-    base64Salt: string;
-    base64Pwd: string;
 }

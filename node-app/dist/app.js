@@ -14,6 +14,7 @@ const app = (0, express_1.default)();
 const cors_1 = __importDefault(require("cors"));
 app.use((0, cors_1.default)());
 app.use((0, body_parser_1.json)());
+//add local passport
 app.use("/users", usersRouter_1.default);
 app.use("/files", filesRouter_1.default);
 app.use((err, _req, res, _next) => {

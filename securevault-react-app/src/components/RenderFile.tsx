@@ -1,4 +1,4 @@
-import { IFile } from '../models/interfaces/Interfaces';
+import { IFile } from '../models/interfaces/interfaces';
 import { getImage, imagePath } from '../utils/ImagesLoader';
 import { sizeInMb } from '../utils/SizeInMb';
 
