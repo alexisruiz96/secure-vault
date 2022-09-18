@@ -10,6 +10,7 @@ export const GOOGLE_STORAGE_BUCKET_URL = process.env.GOOGLE_STORAGE_BUCKET_URL a
 export const PORT = process.env.PORT as string;
 
 export const jwtSecret = crypto.randomBytes(16);
+export const JWT_ISSUER = process.env.JWT_ISSUER as string;
 
 export const i18n_to_add = {
     userNotFound: {

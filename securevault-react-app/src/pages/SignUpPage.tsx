@@ -26,7 +26,6 @@ const SignUpPage: React.FC = () => {
 
     //TODO: change password name to authKey
     const SignUp = async (details: User) => {
-        console.log(details);
         if (details.password != null) {
             const authKey = await CryptoUtil.generateKey(
                 prefixSubKeys.authKey + details.password,

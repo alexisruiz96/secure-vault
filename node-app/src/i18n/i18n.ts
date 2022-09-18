@@ -35,7 +35,7 @@ export const i18n = {
     errorServerRetrievingUser: "Server Error Retrieving User",
     errorUsername: "Username Error",
     loginSuccess: "Login Success",
-    loginError: "Server: Error with the username or password",
+    loginError: "Error with the username or password",
     
     
 } 

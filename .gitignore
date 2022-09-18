@@ -24,3 +24,9 @@ node-app/dist/controllers/usersController.js.map
 node-app/dist/app.js
 node-app/dist/controllers/filesController.js
 node-app/dist/controllers/filesController.js.map
+node-app/dist/routes/usersRouter.js.map
+node-app/dist/app.js
+node-app/dist/database.js
+node-app/dist/controllers/usersController.js
+node-app/dist/models/userModel.js
+node-app/dist/routes/usersRouter.js

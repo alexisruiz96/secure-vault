@@ -5,7 +5,7 @@ import { checkAppendedFormData } from '../utils/FormDataUtils';
 
 //TODO add this and test it to check it works
 //TODO handle this requests adding a jwt or some kind of token
-// axios.defaults.baseURL = "http://localhost:4000/";
+axios.defaults.baseURL = "http://localhost:4000/";
 // axios.defaults.headers.common['Authorization'] = AUTH_TOKEN;
 // axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 
@@ -23,7 +23,7 @@ export const signUp = async (user: User): Promise<string> => {
     try {
         const response = await axios({
             method: "post",
-            url: "http://localhost:4000/users/signup",
+            url: "users/signup",
             timeout: timeMax,
             data: {
                 username: user.username,
@@ -49,7 +49,7 @@ export const login = async (user: ILoginUser): Promise<AxiosResponse> => {
     
     return axios({
         method: "post",
-        url: "http://localhost:4000/users/login",
+        url: "users/login",
         timeout: timeMax,
         data: {
             username: user.username,
@@ -71,7 +71,7 @@ export const uploadData = async (
     //TODO add try catch
     return axios({
         method: "post",
-        url: "http://localhost:4000/files/upload",
+        url: "files/upload",
         timeout: timeMax,
         data: formData,
         headers: {
@@ -83,27 +83,11 @@ export const uploadData = async (
     });
 };
 
-//TODO delete get user salt from server side
-// export const getUserSalt = async (user: string) => {
-//     return axios({
-//         method: "get",
-//         url: "http://localhost:4000/users/salt",
-//         timeout: 5000,
-//         params: {
-//             username: user,
-//         },
-//         headers: {
-//             Allow: "GET",
-//             "Content-Type": "application/json",
-//         },
-//     });
-// }
-
 //TODO: add jwt to the authorization header
 export const getDataSalt = async (user: string) => {
     return axios({
         method: "get",
-        url: "http://localhost:4000/files/salt",
+        url: "files/salt",
         timeout: timeMax,
         params: {
             username: user,

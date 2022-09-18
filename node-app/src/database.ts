@@ -1,5 +1,6 @@
 import { Client, Pool } from "pg";
 
+//TODO: add values to the .env file
 export const client = new Client({
   user: "kali",
   host: "localhost",

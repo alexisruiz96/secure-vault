@@ -1,19 +1,24 @@
 export class User {
   constructor(
-    public id: string,
+    private _id: number,
     public username: string,
     public password: string,
     public epochtime: EpochTimeStamp,
-    public data: string,
+    public data: string | null,
     public salt: string,
     public email: string
-  ) {}
+    ) {}
+    public get id(): number {
+      return this._id;
+    }
+    public set id(value: number) {
+      this._id = value;
+    }
 }
 
 export type Login = {
   username: string;
   password: string;
-  salt: string;
 };
 
 export type UserName = {

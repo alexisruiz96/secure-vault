@@ -55,6 +55,7 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
     const [error, setError] = useState("");
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [userCryptoKey, setUserCryptoKey] = useState<string>("");
+    const [authToken, setAuthToken] = useState<string>("");
     const navigate = useNavigate();
 
     const login = async (details: ILoginUser) => {
@@ -76,6 +77,7 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
             });
             //TODO: authenticate with jwt
             setIsAuthenticated(true);
+            setAuthToken(response.data.auth_token);
 
             //TODO: check to generate it here and only once
             //Generate encryption key
