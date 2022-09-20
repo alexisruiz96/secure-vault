@@ -15,10 +15,18 @@ usersRouter.post(
     loginUser
 );
 
-usersRouter.get("/", getUsers);
+usersRouter.get("/", passport.authorize("jwt", { session: false }), getUsers);
 
-usersRouter.patch("/:id", updateUser);
+usersRouter.patch(
+    "/:id",
+    passport.authorize("jwt", { session: false }),
+    updateUser
+);
 
-usersRouter.delete("/:id", deleteUser);
+usersRouter.delete(
+    "/:id",
+    passport.authorize("jwt", { session: false }),
+    deleteUser
+);
 
 export default usersRouter;

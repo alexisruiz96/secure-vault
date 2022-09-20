@@ -7,7 +7,7 @@ interface Props extends RouteProps {
 }
 
 export const ProtectedRoute: React.FC<Props> = ({ children }: Props) => {
-    debugger;
+    
     const { isAuthenticated } = useAuth();
     const location = useLocation();
 

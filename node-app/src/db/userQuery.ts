@@ -1,5 +1,4 @@
 import { QueryResult } from 'pg';
-import { getUserById, getUsers } from '../controllers/usersController';
 
 import { pool } from '../database';
 import { Login, User } from '../models/userModel';
@@ -46,8 +45,7 @@ export const userQuery = {
                 'SELECT EXISTS ( SELECT DISTINCT * FROM users u WHERE username like $1 and "password" like $2 );',
                 [user.username, derivedPwd]
             );
-            if (response.rowCount === 0)
-                throw Error;
+            if (response.rowCount === 0) throw Error;
             return response;
         } catch (error) {
             throw Error;
@@ -57,7 +55,7 @@ export const userQuery = {
     async getUsers(): Promise<QueryResult> {
         try {
             const response: QueryResult = await pool.query(
-                'SELECT * FROM USERS;'
+                "SELECT * FROM USERS;"
             );
             return response;
         } catch (error) {
@@ -68,7 +66,7 @@ export const userQuery = {
     async getUserById(id: number): Promise<QueryResult> {
         try {
             const response: QueryResult = await pool.query(
-                'SELECT * FROM USERS WHERE id=$1',
+                "SELECT * FROM USERS WHERE id=$1",
                 [id]
             );
             return response;
@@ -80,12 +78,12 @@ export const userQuery = {
     async getUserByUsername(username: string): Promise<QueryResult> {
         try {
             const response: QueryResult = await pool.query(
-                'SELECT * FROM USERS WHERE username=$1',
+                "SELECT * FROM USERS WHERE username=$1",
                 [username]
             );
             return response;
         } catch (error) {
             throw Error;
         }
-    }
+    },
 };

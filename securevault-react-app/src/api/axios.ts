@@ -5,19 +5,19 @@ import { checkAppendedFormData } from '../utils/FormDataUtils';
 
 //TODO add this and test it to check it works
 //TODO handle this requests adding a jwt or some kind of token
-axios.defaults.baseURL = "http://localhost:4000/";
-// axios.defaults.headers.common['Authorization'] = AUTH_TOKEN;
-// axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 
 //TODO: test this
 // export const axiosInstance = axios.create({
-//     baseURL: "http://localhost:4000/",
-//     headers: {
-//         'Content-Type': 'application/x-www-form-urlencoded',
-//     }
-// });
-
+    //     baseURL: "http://localhost:4000/",
+    //     headers: {
+        //         'Content-Type': 'application/x-www-form-urlencoded',
+        //     }
+        // });
+        
 const timeMax = 30000;
+        
+axios.defaults.baseURL = "http://localhost:4000/";
+// axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 
 export const signUp = async (user: User): Promise<string> => {
     try {
@@ -47,7 +47,7 @@ export const signUp = async (user: User): Promise<string> => {
 
 export const login = async (user: ILoginUser): Promise<AxiosResponse> => {
     
-    return axios({
+    const response = await axios({
         method: "post",
         url: "users/login",
         timeout: timeMax,
@@ -61,6 +61,12 @@ export const login = async (user: ILoginUser): Promise<AxiosResponse> => {
             "Content-Type": "application/json",
         },
     });
+    axios.defaults.headers.common['Authorization'] = 'JWT ' + response.data.auth_token;
+    return response;
+};
+
+export const logout = (): void => {
+    axios.defaults.headers.common['Authorization'] = '';
 };
 
 export const uploadData = async (

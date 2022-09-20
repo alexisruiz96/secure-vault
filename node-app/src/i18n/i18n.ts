@@ -1,5 +1,4 @@
 export const i18n = {
-    
     serverError: "Server Error: ",
     serverChallenge: "Server: Solve the challenge",
     serverInternalError: "Server Error: Internal Error",
@@ -36,6 +35,4 @@ export const i18n = {
     errorUsername: "Username Error",
     loginSuccess: "Login Success",
     loginError: "Error with the username or password",
-    
-    
-} 
+};

@@ -20,7 +20,6 @@ export const createUser: RequestHandler = async (
     _next
 ): Promise<Response> => {
     try {
-        debugger;
         const user = req.body as User;
         const serverSalt: Uint8Array = crypto.randomBytes(16);
         const serverSaltString = base64.encode(serverSalt, true, false);
@@ -52,6 +51,14 @@ export const createUser: RequestHandler = async (
     }
 };
 
+//TODO: Add refresh token
+/**
+ * Login function executed when passport local validates the user
+ * @param req
+ * @param res
+ * @param _next
+ * @returns
+ */
 export const loginUser: RequestHandler = async (
     req: Request,
     res: Response,
@@ -85,19 +92,31 @@ export const loginUser: RequestHandler = async (
     }
 };
 
+/**
+ *
+ * @param user {username, password}
+ * @returns
+ */
 const generateJwt = (user: Login) => {
+    //TODO: Save values in an env file
     const jwtClaims = {
         sub: user.username,
         iss: "localhost:4000",
-        exp: Math.floor(Date.now() / 1000) + 604800,
         role: "user",
     };
 
-    return jwt.sign(jwtClaims, jwtSecret);
+    return jwt.sign(jwtClaims, jwtSecret, { expiresIn: "1h" });
 };
 
-//BELLOW FUNCTIONS ARE NOT USED IN THE PROJECT FOR THE MOMENT//
+//FUNCTIONS BELOW ARE NOT USED AT THE MOMENT//
 
+/**
+ * Get list of all users
+ * @param _req
+ * @param res
+ * @param _next
+ * @returns
+ */
 export const getUsers: RequestHandler = async (
     _req: Request,
     res: Response,
@@ -111,7 +130,14 @@ export const getUsers: RequestHandler = async (
     }
 };
 
-//GET /users/:id
+/**
+ * Get user by id
+ * GET /users/:id
+ * @param req
+ * @param res
+ * @param _next
+ * @returns user
+ */
 export const getUserById: RequestHandler<{ id: string }> = async (
     req: Request,
     res: Response,
@@ -130,7 +156,14 @@ export const getUserById: RequestHandler<{ id: string }> = async (
     }
 };
 
-//PUT /users/:id
+/**
+ * Update user by id
+ * PUT /users/:id
+ * @param req
+ * @param res
+ * @param _next
+ * @returns response message
+ */
 export const updateUser: RequestHandler<{ id: string }> = async (
     req: Request,
     res: Response,
@@ -157,7 +190,14 @@ export const updateUser: RequestHandler<{ id: string }> = async (
     }
 };
 
-//DELETE /users/:id
+/**
+ * Delete user by id
+ * DELETE /users/:id
+ * @param req
+ * @param res
+ * @param _next
+ * @returns response message
+ */
 export const deleteUser: RequestHandler<{ id: string }> = async (
     req: Request,
     res: Response,

@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import multer from 'multer';
+import passport from 'passport';
 
-import { deleteFile, downloadFile, uploadFile, getDataSalt } from '../controllers/filesController';
+import { deleteFile, downloadFile, getDataSalt, uploadFile } from '../controllers/filesController';
 
 const filesRouter = Router();
 
@@ -9,11 +10,24 @@ const storage = multer.diskStorage({});
 
 let upload = multer({ storage: storage });
 
-filesRouter.post("/upload", upload.single("myFile"), uploadFile);
+filesRouter.post(
+    "/upload",
+    passport.authorize("jwt", { session: false }),
+    upload.single("myFile"),
+    uploadFile
+);
 
-filesRouter.get("/download", downloadFile);
+filesRouter.get(
+    "/download",
+    passport.authorize("jwt", { session: false }),
+    downloadFile
+);
 
-filesRouter.get("/salt", getDataSalt);
+filesRouter.get(
+    "/salt",
+    passport.authorize("jwt", { session: false }),
+    getDataSalt
+);
 
 // discuss if this is necessary
 // filesRouter.patch('/:id', updateFile);
