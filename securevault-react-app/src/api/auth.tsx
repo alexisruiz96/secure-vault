@@ -61,6 +61,7 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
 
         const newLoginUser = { ...details };
 
+        //TODO pass it to the library BLOCK
         const authKey = await CryptoUtil.generateKey(
             prefixSubKeys.authKey + newLoginUser.password,
             true
@@ -69,6 +70,8 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
         newLoginUser.password = authKey as string;
         
         const response = await secureVaultApi.login(newLoginUser);
+        //TODO pass it to the library BLOCK END
+
         if (response.status === 200) {
             setUser({
                 username: response.data.username,
@@ -92,6 +95,7 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
         navigate("/login");
     };
 
+    //TODO pass it to the library BLOCK
     const generateCryptoKey = async (password: string) => {
         CryptoUtil.generateKey(prefixSubKeys.encKey + password, true).then(
             (key: VaultKey) => {
@@ -103,6 +107,7 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
             }
         );
     };
+    //TODO pass it to the library BLOCK END
 
     return (
         <AuthContext.Provider

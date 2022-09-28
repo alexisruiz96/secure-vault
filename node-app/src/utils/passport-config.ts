@@ -1,4 +1,4 @@
-import { JwtPayload, verify as verifyJwt } from 'jsonwebtoken';
+import { JwtPayload} from 'jsonwebtoken';
 import * as passport from 'passport';
 import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt';
 import { Strategy as LocalStrategy } from 'passport-local';

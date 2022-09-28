@@ -2,6 +2,11 @@ import axios, { AxiosResponse } from 'axios';
 
 import { ILoginUser, User } from "../models/interfaces/interfaces";
 import { checkAppendedFormData } from '../utils/FormDataUtils';
+import { SecureVaultClient } from 'secure-vault-client';
+
+const vault = new SecureVaultClient({
+    baseUrl: 'http://localhost:4000',
+});
 
 //TODO add this and test it to check it works
 //TODO handle this requests adding a jwt or some kind of token
@@ -17,7 +22,6 @@ import { checkAppendedFormData } from '../utils/FormDataUtils';
 const timeMax = 30000;
         
 axios.defaults.baseURL = "http://localhost:4000/";
-// axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded';
 
 export const signUp = async (user: User): Promise<string> => {
     try {

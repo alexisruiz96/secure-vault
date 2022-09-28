@@ -35,16 +35,21 @@ const HomePage: React.FC = () => {
             if (file === null) throw new Error("File is empty");
             // ENCRYPT FILE BLOCK
             const fileBinaryData = await file?.arrayBuffer();
+            
+            //TODO pass it to the library BLOCK
             const encryptedDataFileStringify = await CryptoUtil.encryptData(
                 userCryptoKey,
                 fileBinaryData as ArrayBuffer
             );
+            
             const encryptedDataFileJSON = JSON.parse(
                 encryptedDataFileStringify as string
             );
             const encryptedDataBuffer = CryptoUtil.convertBase64ToBuffer(
                 encryptedDataFileJSON[0]?.encryptedData
             );
+            //TODO pass it to the library BLOCK END
+
             const encryptedFile = new File(
                 [encryptedDataBuffer],
                 file?.name as string,
@@ -118,11 +123,13 @@ const HomePage: React.FC = () => {
 
                                     return;
                                 }
+                                //TODO pass it to the library BLOCK 
                                 const decryptedData = await CryptoUtil.decryptData(
                                     userCryptoKey,
                                     value,
                                     saltData
                                 )
+                                //TODO pass it to the library BLOCK END
                                 // Get the data and send it to the browser via the controller
                                 controller.enqueue(decryptedData);
                                 // Check chunks by logging to the console

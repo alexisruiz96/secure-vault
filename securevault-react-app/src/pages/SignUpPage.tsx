@@ -27,6 +27,7 @@ const SignUpPage: React.FC = () => {
     //TODO: change password name to authKey
     const SignUp = async (details: User) => {
         if (details.password != null) {
+            //TODO pass it to the library BLOCK 
             const authKey = await CryptoUtil.generateKey(
                 prefixSubKeys.authKey + details.password,
                 true
@@ -35,6 +36,7 @@ const SignUpPage: React.FC = () => {
             user.password = authKey as string;
 
             secureVaultApi.signUp(user);
+            //TODO pass it to the library BLOCK 
             navigate("/login");
         } else {
             console.log("Details do not match");

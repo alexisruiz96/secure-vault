@@ -3,10 +3,7 @@ import { json } from 'body-parser';
 import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
 import passport from 'passport';
-import { Strategy as LocalStrategy } from 'passport-local';
-import { QueryResult } from 'pg';
 
-import { userQuery } from './db/userQuery';
 import { i18n } from './i18n/i18n';
 import filesRouter from './routes/filesRouter';
 import usersRouter from './routes/usersRouter';
