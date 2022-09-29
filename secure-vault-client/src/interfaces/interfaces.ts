@@ -5,18 +5,6 @@ export interface User {
     data: string;
     email: string;
 }
-export interface IFile {
-    name: string;
-    sizeInBytes: number;
-    format: string;
-    id?: string;
-}
-
-export interface ImageLoaderProps {
-    items: {
-        [key: string]: string;
-    };
-}
 
 export interface ILoginUser {
     username: string;
@@ -37,3 +25,5 @@ export interface ICryptoOptions {
     format: "pkcs8" | "raw" | "spki";
     algorithm: "AES-CTR" | "AES-CBC" | "AES-GCM" | "AES-KW";
 }
+
+export type VaultKey  = string | ArrayBuffer;

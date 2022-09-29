@@ -7,6 +7,9 @@ import { VaultKey } from '../models/types/types';
 import { prefixSubKeys } from '../modules/config';
 import * as CryptoUtil from '../modules/CryptoUtils';
 
+import { secureVault } from '../index';
+import { AxiosResponse } from 'axios';
+
 interface Props {
     children: React.ReactNode[] | React.ReactNode;
 }
@@ -62,14 +65,10 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
         const newLoginUser = { ...details };
 
         //TODO pass it to the library BLOCK
-        const authKey = await CryptoUtil.generateKey(
-            prefixSubKeys.authKey + newLoginUser.password,
-            true
+        const response: AxiosResponse = await secureVault.initialize(
+            {username: newLoginUser.username, password: newLoginUser.password}
         );
 
-        newLoginUser.password = authKey as string;
-        
-        const response = await secureVaultApi.login(newLoginUser);
         //TODO pass it to the library BLOCK END
 
         if (response.status === 200) {
@@ -80,9 +79,6 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
             //TODO: authenticate with jwt
             setIsAuthenticated(true);
 
-            //TODO: check to generate it here and only once
-            //Generate encryption key
-            generateCryptoKey(details.password);
         } else {
             setError(response.data);
             setIsAuthenticated(false);
@@ -96,17 +92,7 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
     };
 
     //TODO pass it to the library BLOCK
-    const generateCryptoKey = async (password: string) => {
-        CryptoUtil.generateKey(prefixSubKeys.encKey + password, true).then(
-            (key: VaultKey) => {
-                CryptoUtil.generateCryptoKey(key as string).then(
-                    (cryptoKeyRes: string) => {
-                        setUserCryptoKey(cryptoKeyRes);
-                    }
-                );
-            }
-        );
-    };
+
     //TODO pass it to the library BLOCK END
 
     return (

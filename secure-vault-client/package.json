@@ -15,7 +15,10 @@
   "author": "aruizalcala",
   "license": "ISC",
   "devDependencies": {
+    "@juanelas/base64": "^1.0.5",
+    "@types/node": "^18.7.23",
     "axios": "^0.27.2",
+    "scrypt-pbkdf": "^1.0.7",
     "tsc": "^2.0.4",
     "typescript": "^4.8.3"
   }

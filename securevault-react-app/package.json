@@ -18,7 +18,6 @@
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
     "scrypt-pbkdf": "^1.0.7",
-    "secure-vault-client": "file:../secure-vault-client",
     "typescript": "^4.7.2",
     "web-vitals": "^2.1.4"
   },
@@ -51,6 +50,7 @@
     "autoprefixer": "^10.4.8",
     "http-proxy-middleware": "^2.0.6",
     "postcss": "^8.4.16",
+    "secure-vault-client": "file:../secure-vault-client",
     "tailwindcss": "^3.1.8"
   }
 }
