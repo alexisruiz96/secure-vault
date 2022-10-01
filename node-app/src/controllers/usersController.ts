@@ -18,7 +18,7 @@ const USERS: User[] = [];
  * Create a new user
  * @param req Request
  * @param res Response
- * @param _next 
+ * @param _next
  * @returns Response
  */
 export const createUser: RequestHandler = async (

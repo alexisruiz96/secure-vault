@@ -1,4 +1,4 @@
-import { ICryptoOptions } from "../interfaces/interfaces";
+import { ICryptoOptions } from '../interfaces/interfaces';
 interface EncryptedData {
     base64IV: string;
     base64Data: string;

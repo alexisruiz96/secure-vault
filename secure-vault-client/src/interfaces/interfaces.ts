@@ -14,7 +14,7 @@ export interface ILoginUser {
 export interface IApiOptions {
     baseUrl: string;
     timeout: number;
-} 
+}
 
 export interface IKeyPrefixes {
     authKey: string;
@@ -26,7 +26,7 @@ export interface ICryptoOptions {
     algorithm: "AES-CTR" | "AES-CBC" | "AES-GCM" | "AES-KW";
 }
 
-export type VaultKey  = string | ArrayBuffer;
+export type VaultKey = string | ArrayBuffer;
 
 export interface IStorage {
     username: string;

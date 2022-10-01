@@ -1,7 +1,8 @@
-import * as scryptPbkdf from "scrypt-pbkdf";
-import * as base64 from "@juanelas/base64";
+import * as scryptPbkdf from 'scrypt-pbkdf';
 
-import { ICryptoOptions } from "../interfaces/interfaces";
+import * as base64 from '@juanelas/base64';
+
+import { ICryptoOptions } from '../interfaces/interfaces';
 
 interface EncryptedData {
     base64IV: string;
@@ -103,7 +104,7 @@ export class CryptoUtil {
                 true,
                 actions
             );
-            const exportedKey:JsonWebKey = await this._subtleCrypto.exportKey(
+            const exportedKey: JsonWebKey = await this._subtleCrypto.exportKey(
                 "jwk",
                 cryptoKey
             );
@@ -162,10 +163,7 @@ export class CryptoUtil {
      * @param {string} dataIV used to encrypt data
      */
     //TODO: pass algorithm as param
-    async decryptData(
-        encryptedData: ArrayBuffer,
-        dataIV: string
-    ) {
+    async decryptData(encryptedData: ArrayBuffer, dataIV: string) {
         const cryptoKey = await this.convertJwkToCryptoKey(
             this._encCryptoKey as string,
             this._options.algorithm

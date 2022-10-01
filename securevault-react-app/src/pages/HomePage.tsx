@@ -30,11 +30,8 @@ const HomePage: React.FC = () => {
 
         try {
             if (file === null) throw new Error("File is empty");
-            // ENCRYPT FILE BLOCK
-
-            //TODO pass it to the library BLOCK
+            
             const response = await secureVault.setStorage(file);
-            //TODO pass it to the library BLOCK END
 
             //TODO define type/interface on library for data
             setDownloadPage(response.data.downloadPage);
@@ -44,7 +41,6 @@ const HomePage: React.FC = () => {
             setUploadState("Upload");
             setIsUploadActive(false);
             console.log("File uploaded successfully");
-            //TODO make upload button disappear and download button appear
         } catch (error) {
             console.error(error);
             setUploadState("Upload Failed");

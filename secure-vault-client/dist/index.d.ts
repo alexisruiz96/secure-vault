@@ -1,5 +1,5 @@
-import { User, ILoginUser, IKeyPrefixes, ICryptoOptions, IApiOptions } from "./interfaces/interfaces";
-import { AxiosResponse } from "axios";
+import { AxiosResponse } from 'axios';
+import { IApiOptions, ICryptoOptions, IKeyPrefixes, ILoginUser, User } from './interfaces/interfaces';
 export interface Options {
     apiOptions: IApiOptions;
     keyPrefixes: IKeyPrefixes;
@@ -22,7 +22,7 @@ export declare class SecureVaultClient {
     login(user: ILoginUser): Promise<AxiosResponse>;
     logout(): Promise<void>;
     getStorage(): Promise<void>;
-    setStorage(storage: any | File): Promise<AxiosResponse['data']>;
+    setStorage(storage: any | File): Promise<AxiosResponse["data"]>;
     downloadStorageToDisk(downloadUrl: string): Promise<void>;
     private checkAppendedFormData;
 }

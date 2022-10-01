@@ -25,9 +25,7 @@ const SignUpPage: React.FC = () => {
     //TODO: change password name to authKey
     const SignUp = async (details: User) => {
         if (details.password != null) {
-            //TODO pass it to the library BLOCK 
             secureVault.signUp(details);
-            //TODO pass it to the library BLOCK 
             navigate("/login");
         } else {
             console.log("Details do not match");

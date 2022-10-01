@@ -1,14 +1,11 @@
-import { CryptoUtil } from "./modules/cryptoUtils";
+import { AxiosResponse } from 'axios';
+
+import { ApiClient } from './api/apiClient';
 import {
-    User,
-    ILoginUser,
-    IKeyPrefixes,
-    ICryptoOptions,
-    IApiOptions,
-    VaultKey,
-} from "./interfaces/interfaces";
-import { AxiosResponse } from "axios";
-import { ApiClient } from "./api/apiClient";
+    IApiOptions, ICryptoOptions, IKeyPrefixes, ILoginUser, User, VaultKey
+} from './interfaces/interfaces';
+import { CryptoUtil } from './modules/cryptoUtils';
+
 export interface Options {
     apiOptions: IApiOptions;
     keyPrefixes: IKeyPrefixes;
@@ -99,14 +96,14 @@ export class SecureVaultClient {
         if (!this._initialized) {
             throw new Error("Client not initialized");
         }
-        console.log('test');
+        console.log("test");
         //TODO define type of encrypted storage
         // get storage from vault
         // decrypt storage with enc key
         // return storage
     }
 
-    async setStorage(storage: any | File): Promise<AxiosResponse['data']> {
+    async setStorage(storage: any | File): Promise<AxiosResponse["data"]> {
         if (!this._initialized) {
             throw new Error("Client not initialized");
         }
@@ -114,41 +111,42 @@ export class SecureVaultClient {
         // encrypt storage with enc key
         // save storage to vault
         //TODO add check if storage is file
-        if(storage instanceof File) {
+        if (storage instanceof File) {
             const fileBinaryData = await storage?.arrayBuffer();
-            const encryptedDataFileStringify = await this._cryptoUtil.encryptData(
-                fileBinaryData as ArrayBuffer
-            );
-    
+            const encryptedDataFileStringify =
+                await this._cryptoUtil.encryptData(
+                    fileBinaryData as ArrayBuffer
+                );
+
             const encryptedDataFileJSON = JSON.parse(
                 encryptedDataFileStringify as string
             );
             const encryptedDataBuffer = this._cryptoUtil.convertBase64ToBuffer(
                 encryptedDataFileJSON[0]?.encryptedData
             );
-    
+
             const encryptedFile = new File(
                 [encryptedDataBuffer],
                 storage?.name as string,
                 { type: storage?.type }
             );
-    
+
             const formData: FormData = new FormData();
-    
+
             formData.append("myFile", encryptedFile as File);
             // END ENCRYPT FILE BLOCK
-    
-            // formData.append("myFile", file as File);
-    
-            this.checkAppendedFormData(formData);
-            const { data }: AxiosResponse['data'] = await this._apiClient.uploadData(
-                formData,
-                this._username,
-                encryptedDataFileJSON[0]?.iv
-            );
 
-            return {data};
-            
+            // formData.append("myFile", file as File);
+
+            this.checkAppendedFormData(formData);
+            const { data }: AxiosResponse["data"] =
+                await this._apiClient.uploadData(
+                    formData,
+                    this._username,
+                    encryptedDataFileJSON[0]?.iv
+                );
+
+            return { data };
         }
     }
 
@@ -162,15 +160,14 @@ export class SecureVaultClient {
         );
         const saltData = saltDataResponse.data.salt;
         const cryptoUtil = this._cryptoUtil;
-        const res = await fetch(downloadUrl as string,
-                {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json",
-                    },
-                }
-            )
+        const res = await fetch(downloadUrl as string, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                "Access-Control-Allow-Origin": "*",
+            },
+        })
             .then((response) => response.body)
             .then((rb) => {
                 if (rb === null) throw new Error("Response body is null");
@@ -190,17 +187,18 @@ export class SecureVaultClient {
 
                                     return;
                                 }
-                                const decryptedData = await cryptoUtil.decryptData(
-                                    value,
-                                    saltData
-                                )
+                                const decryptedData =
+                                    await cryptoUtil.decryptData(
+                                        value,
+                                        saltData
+                                    );
                                 // Get the data and send it to the browser via the controller
                                 controller.enqueue(decryptedData);
                                 // Check chunks by logging to the console
                                 console.log(done, value);
                                 push();
                             });
-                        }
+                        };
 
                         push();
                     },
@@ -208,31 +206,33 @@ export class SecureVaultClient {
             })
             .then((stream) =>
                 // Respond with our stream
-                stream.getReader().read().then(({ value }) => {
-                    const blob = new Blob([value], { type: "image/png" });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = "download.png";
-                    document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
-                    a.click();
-                    a.remove();  //afterwards we remove the element again
-                })
-            
+                stream
+                    .getReader()
+                    .read()
+                    .then(({ value }) => {
+                        const blob = new Blob([value], { type: "image/png" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = "download.png";
+                        document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+                        a.click();
+                        a.remove(); //afterwards we remove the element again
+                    })
             )
             .then((result) => {
                 // Do things with result
                 console.log(result);
             })
-            .catch(e => console.error(e.message));
-        
+            .catch((e) => console.error(e.message));
+
         console.log(res);
     }
 
-    private checkAppendedFormData(formData: FormData){
+    private checkAppendedFormData(formData: FormData) {
         try {
             for (let element of formData.entries()) {
-                console.log(element[0]+ ', ' + element[1]); 
+                console.log(element[0] + ", " + element[1]);
             }
         } catch (error) {
             console.log(error);
