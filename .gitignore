@@ -18,3 +18,12 @@ node-app/secure-vault-360217-623afffad8b7.json
 node-app/.env
 
 secure-vault-client/node_modules/*
+node-app/dist/app.js
+node-app/dist/database.js
+node-app/dist/controllers/filesController.js
+node-app/dist/controllers/usersController.js
+node-app/dist/models/userModel.js
+node-app/dist/routes/filesRouter.js
+node-app/dist/routes/usersRouter.js
+secure-vault-client/dist/api/apiClient.d.ts
+secure-vault-client/dist/api/apiClient.js
