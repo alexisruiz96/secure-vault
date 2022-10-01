@@ -27,3 +27,9 @@ export interface ICryptoOptions {
 }
 
 export type VaultKey  = string | ArrayBuffer;
+
+export interface IStorage {
+    username: string;
+    timestamp: EpochTimeStamp;
+    storage: any;
+}

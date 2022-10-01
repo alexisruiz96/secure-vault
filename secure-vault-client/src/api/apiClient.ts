@@ -59,9 +59,7 @@ export class ApiClient{
             url: "users/login",
             data: {
                 username: user.username,
-                password: user.password
-                //TODO delete salt from server side login
-            },
+                password: user.password            },
             headers: {
                 Allow: "POST",
                 "Content-Type": "application/json",

@@ -22,3 +22,8 @@ export interface ICryptoOptions {
     algorithm: "AES-CTR" | "AES-CBC" | "AES-GCM" | "AES-KW";
 }
 export declare type VaultKey = string | ArrayBuffer;
+export interface IStorage {
+    username: string;
+    timestamp: EpochTimeStamp;
+    storage: any;
+}

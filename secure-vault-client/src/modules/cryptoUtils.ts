@@ -122,9 +122,9 @@ export class CryptoUtil {
      */
     //TODO: pass algorithm as param
     //TODO: pass cryptoKey as string or ArrayBuffer
-    async encryptData(cryptoKeyJwk: string, data: ArrayBuffer) {
+    async encryptData(data: ArrayBuffer) {
         const cryptoKey = await this.convertJwkToCryptoKey(
-            cryptoKeyJwk,
+            this._encCryptoKey as string,
             this._options.algorithm
         );
 
@@ -163,12 +163,11 @@ export class CryptoUtil {
      */
     //TODO: pass algorithm as param
     async decryptData(
-        userCryptoKey: string,
         encryptedData: ArrayBuffer,
         dataIV: string
     ) {
         const cryptoKey = await this.convertJwkToCryptoKey(
-            userCryptoKey,
+            this._encCryptoKey as string,
             this._options.algorithm
         );
         const iv = this.convertBase64ToBuffer(dataIV) as Uint8Array;

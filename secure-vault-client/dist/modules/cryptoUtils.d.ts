@@ -40,14 +40,14 @@ export declare class CryptoUtil {
      * @param {string} cryptoKeyJwk
      * @returns {JSON} Returns IV and data encrypted
      */
-    encryptData(cryptoKeyJwk: string, data: ArrayBuffer): Promise<string | undefined>;
+    encryptData(data: ArrayBuffer): Promise<string | undefined>;
     /**
      * Pass JsonWebKey to CryptoKey and decrypt data
      * @param {string} userCryptoKey JsonWebKey stringified
      * @param {ArrayBuffer} encryptedData Encrypted binary data
      * @param {string} dataIV used to encrypt data
      */
-    decryptData(userCryptoKey: string, encryptedData: ArrayBuffer, dataIV: string): Promise<ArrayBuffer | undefined>;
+    decryptData(encryptedData: ArrayBuffer, dataIV: string): Promise<ArrayBuffer | undefined>;
     convertBufferToBase64(data: ArrayBuffer): string;
     convertBase64ToBuffer(data: string): string | Uint8Array;
     /**

@@ -22,18 +22,3 @@ export interface ILoginUser {
     username: string;
     password: string;
 }
-
-export interface IApiOptions {
-    baseUrl: string;
-    timeout: number;
-} 
-
-export interface IKeyPrefixes {
-    authKey: string;
-    encKey: string;
-}
-
-export interface ICryptoOptions {
-    format: "pkcs8" | "raw" | "spki";
-    algorithm: "AES-CTR" | "AES-CBC" | "AES-GCM" | "AES-KW";
-}

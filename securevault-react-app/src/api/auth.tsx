@@ -1,14 +1,9 @@
+import { AxiosResponse } from 'axios';
 import { createContext, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import * as secureVaultApi from '../api/axios';
-import { ILoginUser } from '../models/interfaces/interfaces';
-import { VaultKey } from '../models/types/types';
-import { prefixSubKeys } from '../modules/config';
-import * as CryptoUtil from '../modules/CryptoUtils';
-
 import { secureVault } from '../index';
-import { AxiosResponse } from 'axios';
+import { ILoginUser } from '../models/interfaces/interfaces';
 
 interface Props {
     children: React.ReactNode[] | React.ReactNode;
@@ -19,7 +14,6 @@ export type AuthContextType = {
     user: ILoginUser;
     login: (user: ILoginUser) => void;
     logout: () => void;
-    userCryptoKey: string;
     error: string;
 };
 
@@ -27,13 +21,8 @@ const defaultIUserLogin = { username: "", password: "", salt: "" };
 const defaultContext: AuthContextType = {
     isAuthenticated: false,
     user: defaultIUserLogin,
-    login: (_user: ILoginUser) => {
-        /* TODO document why this method 'login' is empty */
-    },
-    logout: () => {
-        /* TODO document why this method 'logout' is empty */
-    },
-    userCryptoKey: "",
+    login: (_user: ILoginUser) => {},
+    logout: () => {},
     error: "",
 };
 
@@ -57,19 +46,15 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
     });
     const [error, setError] = useState("");
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [userCryptoKey, setUserCryptoKey] = useState<string>("");
     const navigate = useNavigate();
 
     const login = async (details: ILoginUser) => {
-
         const newLoginUser = { ...details };
 
-        //TODO pass it to the library BLOCK
-        const response: AxiosResponse = await secureVault.initialize(
-            {username: newLoginUser.username, password: newLoginUser.password}
-        );
-
-        //TODO pass it to the library BLOCK END
+        const response: AxiosResponse = await secureVault.initialize({
+            username: newLoginUser.username,
+            password: newLoginUser.password,
+        });
 
         if (response.status === 200) {
             setUser({
@@ -78,7 +63,6 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
             });
             //TODO: authenticate with jwt
             setIsAuthenticated(true);
-
         } else {
             setError(response.data);
             setIsAuthenticated(false);
@@ -87,13 +71,9 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
 
     const logout = () => {
         setUser(defaultIUserLogin);
-        secureVaultApi.logout();
+        secureVault.logout();
         navigate("/login");
     };
-
-    //TODO pass it to the library BLOCK
-
-    //TODO pass it to the library BLOCK END
 
     return (
         <AuthContext.Provider
@@ -103,7 +83,6 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
                 login,
                 logout,
                 error,
-                userCryptoKey,
             }}
         >
             {children}

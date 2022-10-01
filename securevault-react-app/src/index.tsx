@@ -3,7 +3,6 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import { SecureVaultClient } from 'secure-vault-client';
-import { IKeyPrefixes,IApiOptions } from "./models/interfaces/interfaces";
 import { prefixSubKeys } from "./modules/config";
 
 

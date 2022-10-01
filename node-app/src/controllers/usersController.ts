@@ -14,6 +14,13 @@ import { pbkdf2Async } from '../utils/pbkdf2Async';
 
 const USERS: User[] = [];
 
+/**
+ * Create a new user
+ * @param req Request
+ * @param res Response
+ * @param _next 
+ * @returns Response
+ */
 export const createUser: RequestHandler = async (
     req: Request,
     res: Response,
@@ -72,11 +79,11 @@ export const loginUser: RequestHandler = async (
 
         const token = generateJwt(user);
 
-        // Set jwt into a cookie
-        // res.cookie("auth", token, {
-        //   httpOnly: true,
-        //   secure: true,
-        // });
+        /* Set jwt into a cookie
+        res.cookie("auth", token, {
+           httpOnly: true,
+           secure: true,
+        });*/
 
         return res.status(200).json({
             isLogged: true,

@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import * as secureVaultApi from '../api/axios';
 import { User } from '../models/interfaces/interfaces';
-import { prefixSubKeys } from '../modules/config';
-import * as CryptoUtil from '../modules/CryptoUtils';
+import { secureVault } from '..';
 
 const SignUpPage: React.FC = () => {
     const [details, setDetails] = useState({
@@ -28,14 +26,7 @@ const SignUpPage: React.FC = () => {
     const SignUp = async (details: User) => {
         if (details.password != null) {
             //TODO pass it to the library BLOCK 
-            const authKey = await CryptoUtil.generateKey(
-                prefixSubKeys.authKey + details.password,
-                true
-            );
-            let user = { ...details };
-            user.password = authKey as string;
-
-            secureVaultApi.signUp(user);
+            secureVault.signUp(details);
             //TODO pass it to the library BLOCK 
             navigate("/login");
         } else {
