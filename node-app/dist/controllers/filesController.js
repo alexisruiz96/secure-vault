@@ -72,7 +72,12 @@ const uploadFile = (req, res, _next) => __awaiter(void 0, void 0, void 0, functi
             .on("finish", () => __awaiter(void 0, void 0, void 0, function* () {
             console.log("done");
             try {
-                yield database_1.pool.query("UPDATE USERS SET data=$1, salt_data=$2 WHERE username like $3", [filename_user, req.headers.saltdata, req.headers.username]);
+                yield database_1.pool.query("UPDATE USERS SET data=$1, salt_data=$2, epochtime=$4 WHERE username like $3", [
+                    filename_user,
+                    req.headers.saltdata,
+                    req.headers.username,
+                    parseInt(req.headers.uploadtime)
+                ]);
                 const signedUrl = yield generateV4ReadSignedUrl(gc, config_1.GOOGLE_STORAGE_BUCKET_NAME, filename_user);
                 res.status(201).json({
                     message: i18n_1.i18n.fileSuccessUploaded,

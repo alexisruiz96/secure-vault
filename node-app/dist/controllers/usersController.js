@@ -33,33 +33,35 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUser = exports.updateUser = exports.getUserById = exports.getUsers = exports.loginUser = exports.createUser = void 0;
+const crypto = __importStar(require("crypto"));
 const jwt = __importStar(require("jsonwebtoken"));
-const pbkdf2_1 = require("pbkdf2");
 const base64 = __importStar(require("@juanelas/base64"));
 const database_1 = require("../database");
+const userQuery_1 = require("../db/userQuery");
 const i18n_1 = require("../i18n/i18n");
+const userModel_1 = require("../models/userModel");
 const config_1 = require("../utils/config");
-const crypto = __importStar(require("crypto"));
+const pbkdf2Async_1 = require("../utils/pbkdf2Async");
 const USERS = [];
+/**
+ * Create a new user
+ * @param req Request
+ * @param res Response
+ * @param _next
+ * @returns Response
+ */
 const createUser = (req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        debugger;
         const user = req.body;
         const serverSalt = crypto.randomBytes(16);
         const serverSaltString = base64.encode(serverSalt, true, false);
-        const derivedPwd = yield pbkdf2Async(user.password, serverSaltString, 100000, 64, "sha512");
+        const derivedPwd = yield (0, pbkdf2Async_1.pbkdf2Async)(user.password, serverSaltString, 100000, 64, "sha512");
         if (derivedPwd instanceof Error) {
             return res.status(500).send(derivedPwd.message);
         }
         const data = user.data !== "" ? user.data : null;
-        yield database_1.pool.query('INSERT INTO USERS (username, "password", epochtime, "data", salt, email) VALUES($1, $2, $3, $4, $5, $6);', [
-            user.username,
-            derivedPwd,
-            user.epochtime,
-            data,
-            serverSaltString,
-            user.email,
-        ]);
+        const newUser = new userModel_1.User(0, user.username, derivedPwd, user.epochtime, data, serverSaltString, user.email);
+        yield userQuery_1.userQuery.createUser(newUser);
         return res.status(201).json(i18n_1.i18n.userSuccessCreated);
     }
     catch (error) {
@@ -67,27 +69,30 @@ const createUser = (req, res, _next) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.createUser = createUser;
+//TODO: Add refresh token
+/**
+ * Login function executed when passport local validates the user
+ * @param req
+ * @param res
+ * @param _next
+ * @returns
+ */
 const loginUser = (req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = req.body;
-        const saltRes = yield database_1.pool.query('SELECT salt FROM USERS WHERE username = $1;', [user.username]);
-        if (saltRes.rowCount === 0 || saltRes.rows[0].salt === undefined)
-            throw Error;
-        //TODO retrieve salt from db
-        const derivedPwd = yield pbkdf2Async(user.password, saltRes.rows[0].salt, 100000, 64, "sha512");
-        const response = yield database_1.pool.query('SELECT EXISTS ( SELECT DISTINCT * FROM users u WHERE username like $1 and "password" like $2 );', [user.username, derivedPwd]);
-        if (response.rowCount === 0 || !response.rows[0].exists)
-            throw Error;
+        // const response: QueryResult = await userQuery.validateUser(user);
+        // if(!response.rows[0].exists) throw Error;
         const token = generateJwt(user);
-        // Set jwt into a cookie
+        /* Set jwt into a cookie
         res.cookie("auth", token, {
-            httpOnly: true,
-            secure: true,
-        });
+           httpOnly: true,
+           secure: true,
+        });*/
         return res.status(200).json({
             isLogged: true,
             message: "Server: Logged in",
             username: user.username,
+            auth_token: token,
         });
     }
     catch (error) {
@@ -98,27 +103,31 @@ const loginUser = (req, res, _next) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.loginUser = loginUser;
-const pbkdf2Async = (password, salt, iterations, keylen, digest) => __awaiter(void 0, void 0, void 0, function* () {
-    return new Promise((res, rej) => {
-        (0, pbkdf2_1.pbkdf2)(password, salt, iterations, keylen, digest, (err, derivedKey) => {
-            err ? rej(err) : res(base64.encode(derivedKey, true, false));
-        });
-    });
-});
+/**
+ *
+ * @param user {username, password}
+ * @returns
+ */
 const generateJwt = (user) => {
+    //TODO: Save values in an env file
     const jwtClaims = {
         sub: user.username,
         iss: "localhost:4000",
-        aud: "localhost:4000",
-        exp: Math.floor(Date.now() / 1000) + 604800,
         role: "user",
     };
-    return jwt.sign(jwtClaims, config_1.jwtSecret);
+    return jwt.sign(jwtClaims, config_1.jwtSecret, { expiresIn: "1h" });
 };
-//BELLOW FUNCTIONS ARE NOT USED IN THE PROJECT FOR THE MOMENT//
+//FUNCTIONS BELOW ARE NOT USED AT THE MOMENT//
+/**
+ * Get list of all users
+ * @param _req
+ * @param res
+ * @param _next
+ * @returns
+ */
 const getUsers = (_req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield database_1.pool.query("SELECT * FROM USERS");
+        const response = yield userQuery_1.userQuery.getUsers();
         return res.status(200).json({ users: response.rows });
     }
     catch (error) {
@@ -126,10 +135,18 @@ const getUsers = (_req, res, _next) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.getUsers = getUsers;
-//GET /users/:id
+/**
+ * Get user by id
+ * GET /users/:id
+ * @param req
+ * @param res
+ * @param _next
+ * @returns user
+ */
 const getUserById = (req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield database_1.pool.query("SELECT * FROM USERS WHERE id=$1", [req.params.id]);
+        const id = parseInt(req.params.id);
+        const response = yield userQuery_1.userQuery.getUserById(id);
         if (response.rows.length === 0) {
             return res.status(404).json(i18n_1.i18n.userNotFound);
         }
@@ -140,7 +157,14 @@ const getUserById = (req, res, _next) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.getUserById = getUserById;
-//PUT /users/:id
+/**
+ * Update user by id
+ * PUT /users/:id
+ * @param req
+ * @param res
+ * @param _next
+ * @returns response message
+ */
 const updateUser = (req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = req.body;
@@ -159,7 +183,14 @@ const updateUser = (req, res, _next) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.updateUser = updateUser;
-//DELETE /users/:id
+/**
+ * Delete user by id
+ * DELETE /users/:id
+ * @param req
+ * @param res
+ * @param _next
+ * @returns response message
+ */
 const deleteUser = (req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         yield database_1.pool.query("DELETE FROM USERS WHERE id=$1", [req.params.id]);

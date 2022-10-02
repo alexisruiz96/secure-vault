@@ -85,11 +85,12 @@ export const uploadFile: RequestHandler = async (
                     console.log("done");
                     try {
                         await pool.query(
-                            "UPDATE USERS SET data=$1, salt_data=$2 WHERE username like $3",
+                            "UPDATE USERS SET data=$1, salt_data=$2, epochtime=$4 WHERE username like $3",
                             [
                                 filename_user,
                                 req.headers.saltdata,
                                 req.headers.username,
+                                parseInt(req.headers.uploadtime as string)
                             ]
                         );
                         const signedUrl = await generateV4ReadSignedUrl(

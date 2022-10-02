@@ -90,6 +90,7 @@ export class ApiClient {
                 "Content-Type": "multipart/form-data",
                 username: username,
                 saltdata: saltdata,
+                uploadTime: new Date().getTime(),
             },
         });
     }

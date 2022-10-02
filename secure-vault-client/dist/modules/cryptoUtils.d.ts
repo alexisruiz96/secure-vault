@@ -48,6 +48,8 @@ export declare class CryptoUtil {
      * @param {string} dataIV used to encrypt data
      */
     decryptData(encryptedData: ArrayBuffer, dataIV: string): Promise<ArrayBuffer | undefined>;
+    downloadDataFromUrl(downloadUrl: string, saltData: string): Promise<void>;
+    downloadDataFromLocalStorage(saltData: string): Promise<void>;
     convertBufferToBase64(data: ArrayBuffer): string;
     convertBase64ToBuffer(data: string): string | Uint8Array;
     /**

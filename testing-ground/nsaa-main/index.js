@@ -14,7 +14,7 @@ const sqlite3 = require('sqlite3')
 const timestamp = require('timestamp')
 const securevault = require('./securevault.js')
 const crypto = require('crypto').webcrypto
-var GitHubStrategy = require('passport-github2').Strategy;
+let GitHubStrategy = require('passport-github2').Strategy;
 const env = require('dotenv').config()
 
 

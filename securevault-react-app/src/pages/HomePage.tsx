@@ -34,10 +34,10 @@ const HomePage: React.FC = () => {
             const response = await secureVault.setStorage(file);
 
             //TODO define type/interface on library for data
-            setDownloadPage(response.data.downloadPage);
+            setDownloadPage(response.downloadPage);
             setUploadState("Upload Successful");
             await new Promise((f) => setTimeout(f, 1000));
-            setDownloadActive(response.data.downloadActive);
+            setDownloadActive(response.downloadActive);
             setUploadState("Upload");
             setIsUploadActive(false);
             console.log("File uploaded successfully");

@@ -1,10 +1,15 @@
-import { AxiosResponse } from 'axios';
+import { AxiosResponse } from "axios";
 
-import { ApiClient } from './api/apiClient';
+import { ApiClient } from "./api/apiClient";
 import {
-    IApiOptions, ICryptoOptions, IKeyPrefixes, ILoginUser, User, VaultKey
-} from './interfaces/interfaces';
-import { CryptoUtil } from './modules/cryptoUtils';
+    IApiOptions,
+    ICryptoOptions,
+    IKeyPrefixes,
+    ILoginUser,
+    User,
+    VaultKey,
+} from "./interfaces/interfaces";
+import { CryptoUtil } from "./modules/cryptoUtils";
 
 export interface Options {
     apiOptions: IApiOptions;
@@ -86,6 +91,8 @@ export class SecureVaultClient {
         this._apiClient.logout();
         this._cryptoUtil.encCryptoKey = "";
         this._username = "";
+        localStorage.removeItem("vault_data");
+        localStorage.removeItem("vault_data_type");
         this._initialized = false;
 
         // logout from vault
@@ -97,10 +104,10 @@ export class SecureVaultClient {
             throw new Error("Client not initialized");
         }
         console.log("test");
+        //download storage from google storage
+        //save encrypted file to local storage
+        //decrypt the file and show it on the frontend
         //TODO define type of encrypted storage
-        // get storage from vault
-        // decrypt storage with enc key
-        // return storage
     }
 
     async setStorage(storage: any | File): Promise<AxiosResponse["data"]> {
@@ -108,8 +115,7 @@ export class SecureVaultClient {
             throw new Error("Client not initialized");
         }
         console.log("setStorage");
-        // encrypt storage with enc key
-        // save storage to vault
+
         //TODO add check if storage is file
         if (storage instanceof File) {
             const fileBinaryData = await storage?.arrayBuffer();
@@ -139,14 +145,21 @@ export class SecureVaultClient {
             // formData.append("myFile", file as File);
 
             this.checkAppendedFormData(formData);
-            const { data }: AxiosResponse["data"] =
+            const response: AxiosResponse  =
                 await this._apiClient.uploadData(
                     formData,
                     this._username,
                     encryptedDataFileJSON[0]?.iv
                 );
+            if(response.status === 201){
+                const encoder = new TextEncoder();
+                const vault_type = this._cryptoUtil.convertBufferToBase64(encoder.encode(storage?.type as string));
 
-            return { data };
+                localStorage.setItem("vault_data", this._cryptoUtil.convertBufferToBase64(encryptedDataBuffer as ArrayBuffer));
+                localStorage.setItem("vault_data_type", vault_type);
+            }
+
+            return  response["data"] as AxiosResponse["data"];
         }
     }
 
@@ -154,79 +167,15 @@ export class SecureVaultClient {
         if (!this._initialized) {
             throw new Error("Client not initialized");
         }
+        //TODO change download to download from localStorage
 
         const saltDataResponse = await this._apiClient.getDataSalt(
             this._username
         );
         const saltData = saltDataResponse.data.salt;
-        const cryptoUtil = this._cryptoUtil;
-        const res = await fetch(downloadUrl as string, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                "Access-Control-Allow-Origin": "*",
-            },
-        })
-            .then((response) => response.body)
-            .then((rb) => {
-                if (rb === null) throw new Error("Response body is null");
-                const reader = rb.getReader();
-
-                return new ReadableStream({
-                    start(controller) {
-                        // The following function handles each data chunk
-                        const push = () => {
-                            // "done" is a Boolean and value a "Uint8Array"
-                            reader.read().then(async ({ done, value }) => {
-                                // If there is no more data to read
-                                if (done) {
-                                    console.log("done", done);
-                                    controller.close();
-                                    // saveBlob(doc, `fileName`);
-
-                                    return;
-                                }
-                                const decryptedData =
-                                    await cryptoUtil.decryptData(
-                                        value,
-                                        saltData
-                                    );
-                                // Get the data and send it to the browser via the controller
-                                controller.enqueue(decryptedData);
-                                // Check chunks by logging to the console
-                                console.log(done, value);
-                                push();
-                            });
-                        };
-
-                        push();
-                    },
-                });
-            })
-            .then((stream) =>
-                // Respond with our stream
-                stream
-                    .getReader()
-                    .read()
-                    .then(({ value }) => {
-                        const blob = new Blob([value], { type: "image/png" });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement("a");
-                        a.href = url;
-                        a.download = "download.png";
-                        document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
-                        a.click();
-                        a.remove(); //afterwards we remove the element again
-                    })
-            )
-            .then((result) => {
-                // Do things with result
-                console.log(result);
-            })
-            .catch((e) => console.error(e.message));
-
-        console.log(res);
+        // this._cryptoUtil.downloadDataFromUrl(downloadUrl, saltData);
+        this._cryptoUtil.downloadDataFromLocalStorage(saltData);
+        
     }
 
     private checkAppendedFormData(formData: FormData) {

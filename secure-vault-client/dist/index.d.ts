@@ -1,5 +1,5 @@
-import { AxiosResponse } from 'axios';
-import { IApiOptions, ICryptoOptions, IKeyPrefixes, ILoginUser, User } from './interfaces/interfaces';
+import { AxiosResponse } from "axios";
+import { IApiOptions, ICryptoOptions, IKeyPrefixes, ILoginUser, User } from "./interfaces/interfaces";
 export interface Options {
     apiOptions: IApiOptions;
     keyPrefixes: IKeyPrefixes;

@@ -197,6 +197,116 @@ export class CryptoUtil {
         }
     }
 
+    async downloadDataFromUrl(downloadUrl: string, saltData: string) {
+        const cryptoUtil = this;
+        const res = await fetch(downloadUrl as string, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                "Access-Control-Allow-Origin": "*",
+            },
+        })
+            .then((response) => response.body)
+            .then((rb) => {
+                if (rb === null) throw new Error("Response body is null");
+                const reader = rb.getReader();
+
+                return new ReadableStream({
+                    start(controller) {
+                        // The following function handles each data chunk
+                        const push = () => {
+                            // "done" is a Boolean and value a "Uint8Array"
+                            reader.read().then(async ({ done, value }) => {
+                                // If there is no more data to read
+                                if (done) {
+                                    console.log("done", done);
+                                    controller.close();
+                                    // saveBlob(doc, `fileName`);
+
+                                    return;
+                                }
+                                //TODO only decrypt to be shown on browser and save encrypted on local storage
+                                const decryptedData =
+                                    await cryptoUtil.decryptData(
+                                        value,
+                                        saltData
+                                    );
+                                // Get the data and send it to the browser via the controller
+                                controller.enqueue(decryptedData);
+                                // Check chunks by logging to the console
+                                console.log(done, value);
+                                push();
+                            });
+                        };
+
+                        push();
+                    },
+                });
+            })
+            .then((stream) =>
+                // Respond with our stream
+                stream
+                    .getReader()
+                    .read()
+                    .then(({ value }) => {
+                        const randomName = this.convertBufferToBase64(
+                            crypto.getRandomValues(new Uint8Array(12))
+                        );
+                        //TODO check file extension
+                        const blob = new Blob([value], { type: "image/png" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = randomName;
+                        document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+                        a.click();
+                        a.remove(); //afterwards we remove the element again
+                    })
+            )
+            .then((result) => {
+                // Do things with result
+                console.log(result);
+            })
+            .catch((e) => console.error(e.message));
+        // console.log(res);
+    }
+
+    async downloadDataFromLocalStorage(saltData: string) {
+        try {
+            if (localStorage.getItem("vault_data_type") === null) throw Error;
+            const decoder = new TextDecoder();
+            const encodedType = this.convertBase64ToBuffer(
+                localStorage.getItem("vault_data_type") as string
+            );
+            const vault_type = decoder.decode(encodedType as Uint8Array);
+            const vault_data = this.convertBase64ToBuffer(
+                localStorage.getItem("vault_data") as string
+            );
+
+            const decryptedData = await this.decryptData(
+                vault_data as ArrayBuffer,
+                saltData
+            );
+
+            const randomName = this.convertBufferToBase64(
+                crypto.getRandomValues(new Uint8Array(12))
+            );
+            //TODO check file extension
+            if (decryptedData === undefined) throw Error;
+            const blob = new Blob([decryptedData], { type: vault_type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = randomName;
+            document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+            a.click();
+            a.remove();
+        } catch (error) {
+            console.error("Error downloading data from local storage");
+        }
+    }
+
     convertBufferToBase64(data: ArrayBuffer) {
         return base64.encode(data, true, false);
     }
