@@ -33,6 +33,8 @@ export class SecureVaultClient {
             options.apiOptions.timeout
         );
         this._username = "";
+        localStorage.removeItem("vault_data");
+        localStorage.removeItem("vault_data_type");
     }
 
     async initialize(user: ILoginUser): Promise<AxiosResponse> {
