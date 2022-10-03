@@ -27,29 +27,27 @@ export class ApiClient {
         }
     }
 
-    async signUp(user: User): Promise<string> {
-        try {
-            const response = await this._axios({
-                method: "post",
-                url: "users/signup",
-                data: {
-                    username: user.username,
-                    password: user.password,
-                    epochtime: user.epochtime,
-                    data: user.data,
-                    email: user.email,
-                },
-                headers: {
-                    Allow: "POST",
-                    "Content-Type": "application/json",
-                },
-            });
-            console.log(response);
-        } catch (error) {
-            console.error("Error creating user.");
-        }
+    async signUp(user: User): Promise<number> {
+        const response = await this._axios({
+            method: "post",
+            url: "users/signup",
+            data: {
+                username: user.username,
+                password: user.password,
+                epochtime: user.epochtime,
+                data: user.data,
+                email: user.email,
+            },
+            headers: {
+                Allow: "POST",
+                "Content-Type": "application/json",
+            },
+        })
+        .catch((error) => {
+            return error.response;
+        });        
 
-        return "";
+        return response.status;
     }
 
     async login(user: ILoginUser): Promise<AxiosResponse> {
@@ -64,6 +62,9 @@ export class ApiClient {
                 Allow: "POST",
                 "Content-Type": "application/json",
             },
+        })
+        .catch((error) => {
+            return error.response;
         });
         this._axios.defaults.headers.common["Authorization"] =
             "JWT " + response.data.auth_token;
@@ -77,7 +78,8 @@ export class ApiClient {
     async uploadData(
         formData: FormData,
         username: string,
-        saltdata: string
+        saltdata: string,
+        uploadTime: number
     ): Promise<AxiosResponse> {
         this.checkAppendedFormData(formData);
         //TODO add try catch
@@ -90,7 +92,7 @@ export class ApiClient {
                 "Content-Type": "multipart/form-data",
                 username: username,
                 saltdata: saltdata,
-                uploadTime: new Date().getTime(),
+                uploadTime: uploadTime,
             },
         });
     }

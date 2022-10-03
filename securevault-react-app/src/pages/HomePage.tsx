@@ -5,6 +5,7 @@ import { useAuth } from '../api/auth';
 import DownloadFile from '../components/DownloadFile';
 import MyDropzone from '../components/DropZone';
 import RenderFile from '../components/RenderFile';
+import { notify } from '../modules/notifications';
 
 const HomePage: React.FC = () => {
     // SET VARIABLES
@@ -41,6 +42,7 @@ const HomePage: React.FC = () => {
             setUploadState("Upload");
             setIsUploadActive(false);
             console.log("File uploaded successfully");
+            notify("File uploaded successfully","success");
         } catch (error) {
             console.error(error);
             setUploadState("Upload Failed");

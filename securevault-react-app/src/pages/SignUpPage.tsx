@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { User } from '../models/interfaces/interfaces';
 import { secureVault } from '..';
+import { notify } from '../modules/notifications';
 
 const SignUpPage: React.FC = () => {
     const [details, setDetails] = useState({
@@ -12,7 +13,6 @@ const SignUpPage: React.FC = () => {
         data: "",
         email: "",
     });
-    const [error, setError] = useState("");
 
     const navigate = useNavigate();
 
@@ -22,14 +22,18 @@ const SignUpPage: React.FC = () => {
         SignUp(details);
     };
 
-    //TODO: change password name to authKey
     const SignUp = async (details: User) => {
-        if (details.password != null) {
-            secureVault.signUp(details);
-            navigate("/login");
+        if (details.password && details.username) {
+            const status: number = await secureVault.signUp(details);
+            if(status === 201) {
+                notify("Account created successfully", "success");
+                navigate("/login");
+            } else if(status === 500) {
+                notify("Error creating user account", "error");
+            }
         } else {
+            notify("Please enter a username and password", "error");
             console.log("Details do not match");
-            setError("Details do not match");
         }
     };
 
@@ -38,7 +42,6 @@ const SignUpPage: React.FC = () => {
             <div className="App">
                 <div className="form-inner rounded-md">
                     <h2>Sign Up</h2>
-                    {error !== "" ? <div className="error">{error}</div> : ""}
                     <div className="form-group">
                         <label htmlFor="name">Username:</label>
                         <input

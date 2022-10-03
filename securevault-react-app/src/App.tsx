@@ -6,6 +6,8 @@ import { ProtectedRoute } from './components/route/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
+import { ToastContainer} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.min.css';
 
 const App: React.FC = () => {
     return (
@@ -34,6 +36,17 @@ const App: React.FC = () => {
                     />
                 </Routes>
             </AuthProvider>
+            <ToastContainer
+                position="top-center"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
         </BrowserRouter>
     );
 };

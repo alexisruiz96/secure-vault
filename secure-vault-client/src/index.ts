@@ -35,6 +35,7 @@ export class SecureVaultClient {
         this._username = "";
         localStorage.removeItem("vault_data");
         localStorage.removeItem("vault_data_type");
+        localStorage.removeItem("vault_data_upload_time");
     }
 
     async initialize(user: ILoginUser): Promise<AxiosResponse> {
@@ -57,7 +58,7 @@ export class SecureVaultClient {
         return response;
     }
 
-    async signUp(user: User) {
+    async signUp(user: User): Promise<number> {
         const authKey = await this._cryptoUtil.generateKey(
             this._options.keyPrefixes.authKey + user.password,
             true
@@ -65,7 +66,8 @@ export class SecureVaultClient {
         let newUser = { ...user };
         newUser.password = authKey as string;
 
-        this._apiClient.signUp(newUser);
+        const status = await this._apiClient.signUp(newUser);
+        return status;
     }
 
     /**
@@ -95,6 +97,7 @@ export class SecureVaultClient {
         this._username = "";
         localStorage.removeItem("vault_data");
         localStorage.removeItem("vault_data_type");
+        localStorage.removeItem("vault_data_upload_time");
         this._initialized = false;
 
         // logout from vault
@@ -147,11 +150,13 @@ export class SecureVaultClient {
             // formData.append("myFile", file as File);
 
             this.checkAppendedFormData(formData);
+            const uploadTime: EpochTimeStamp = new Date().getTime();
             const response: AxiosResponse  =
                 await this._apiClient.uploadData(
                     formData,
                     this._username,
-                    encryptedDataFileJSON[0]?.iv
+                    encryptedDataFileJSON[0]?.iv,
+                    uploadTime
                 );
             if(response.status === 201){
                 const encoder = new TextEncoder();
@@ -159,6 +164,7 @@ export class SecureVaultClient {
 
                 localStorage.setItem("vault_data", this._cryptoUtil.convertBufferToBase64(encryptedDataBuffer as ArrayBuffer));
                 localStorage.setItem("vault_data_type", vault_type);
+                localStorage.setItem("vault_data_upload_time", uploadTime.toString());
             }
 
             return  response["data"] as AxiosResponse["data"];

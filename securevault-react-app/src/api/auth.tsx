@@ -63,7 +63,7 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
             });
             //TODO: authenticate with jwt
             setIsAuthenticated(true);
-        } else {
+        } else if (response.status === 401) {
             setError(response.data);
             setIsAuthenticated(false);
         }

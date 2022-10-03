@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../api/auth';
 import { ILoginUser } from '../models/interfaces/interfaces';
+import { notify } from '../modules/notifications';
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
@@ -13,7 +14,6 @@ const LoginPage: React.FC = () => {
         email: "",
         password: "",
     });
-    const [error, setError] = useState("");
 
     const Login = async () => {
 
@@ -26,10 +26,11 @@ const LoginPage: React.FC = () => {
         await login(loginUser);
 
         if (isAuthenticated) {
+            notify("Login successful", "success");
             console.log("Logged in!");
             navigate("/");
         } else {
-            setError("Invalid username or password");
+            notify("Invalid username or password", "error");
         }
     };
 
@@ -43,7 +44,6 @@ const LoginPage: React.FC = () => {
             <form onSubmit={submitHandler}>
                 <div className="form-inner rounded-md">
                     <h2>Login</h2>
-                    {error !== "" ? <div className="error">{error}</div> : ""}
                     <div className="form-group">
                         <label htmlFor="username">Username:</label>
                         <input
