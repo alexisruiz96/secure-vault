@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { secureVault } from '../index';
 import { ILoginUser } from '../models/interfaces/interfaces';
+import { i18n } from '../i18n/i18n';
 
 interface Props {
     children: React.ReactNode[] | React.ReactNode;
@@ -33,7 +34,7 @@ export const AuthContext = createContext<AuthContextType | null>(
 export const useAuth = () => {
     const auth = useContext(AuthContext);
     if (auth === null) {
-        throw new Error("useAuth must be used within a AuthProvider");
+        throw new Error(i18n.auth_error);
     }
 
     return auth;

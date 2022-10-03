@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { User } from '../models/interfaces/interfaces';
 import { secureVault } from '..';
 import { notify } from '../modules/notifications';
+import { i18n } from '../i18n/i18n';
 
 const SignUpPage: React.FC = () => {
     const [details, setDetails] = useState({
@@ -26,14 +27,14 @@ const SignUpPage: React.FC = () => {
         if (details.password && details.username) {
             const status: number = await secureVault.signUp(details);
             if(status === 201) {
-                notify("Account created successfully", "success");
+                notify(i18n.signup_success, i18n.toastify_success);
                 navigate("/login");
             } else if(status === 500) {
-                notify("Error creating user account", "error");
+                notify(i18n.signup_error, i18n.toastify_error);
             }
         } else {
-            notify("Please enter a username and password", "error");
-            console.log("Details do not match");
+            notify(i18n.signup_error_data, i18n.toastify_error);
+            console.log(i18n.signup_error_data);
         }
     };
 
@@ -41,9 +42,9 @@ const SignUpPage: React.FC = () => {
         <form onSubmit={submitHandler}>
             <div className="App">
                 <div className="form-inner rounded-md">
-                    <h2>Sign Up</h2>
+                    <h2>{i18n.signup_signup}</h2>
                     <div className="form-group">
-                        <label htmlFor="name">Username:</label>
+                        <label htmlFor="name">{i18n.signup_username}</label>
                         <input
                             type="text"
                             name="username"
@@ -58,7 +59,7 @@ const SignUpPage: React.FC = () => {
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="email">Email: </label>
+                        <label htmlFor="email">{i18n.signup_email}</label>
                         <input
                             type="email"
                             name="email"
@@ -73,7 +74,7 @@ const SignUpPage: React.FC = () => {
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="password">Password: </label>
+                        <label htmlFor="password">{i18n.signup_password}</label>
                         <input
                             type="password"
                             name="password"
@@ -90,7 +91,7 @@ const SignUpPage: React.FC = () => {
                     <div>
                         <input type="submit" value="Submit" />
                         <button onClick={() => navigate("/login")}>
-                            Login
+                            {i18n.signup_login}
                         </button>
                     </div>
                 </div>

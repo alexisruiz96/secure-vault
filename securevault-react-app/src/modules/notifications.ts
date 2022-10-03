@@ -1,6 +1,11 @@
 import {toast} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.min.css';
 
+/**
+ * Component to show notifications
+ * @param message 
+ * @param type "info" | "success" | "warning" | "error"
+ */
 export const notify = (message: string, type: string) => {
     switch (type) {
         case "info":

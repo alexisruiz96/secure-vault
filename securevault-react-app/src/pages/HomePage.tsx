@@ -6,6 +6,7 @@ import DownloadFile from '../components/DownloadFile';
 import MyDropzone from '../components/DropZone';
 import RenderFile from '../components/RenderFile';
 import { notify } from '../modules/notifications';
+import { i18n } from '../i18n/i18n';
 
 const HomePage: React.FC = () => {
     // SET VARIABLES
@@ -37,15 +38,16 @@ const HomePage: React.FC = () => {
             //TODO define type/interface on library for data
             setDownloadPage(response.downloadPage);
             setUploadState("Upload Successful");
+            notify(i18n.file_upload_success,"success");
             await new Promise((f) => setTimeout(f, 1000));
             setDownloadActive(response.downloadActive);
             setUploadState("Upload");
             setIsUploadActive(false);
-            console.log("File uploaded successfully");
-            notify("File uploaded successfully","success");
+            console.log(i18n.file_upload_success);
         } catch (error) {
             console.error(error);
             setUploadState("Upload Failed");
+            notify(i18n.file_upload_error,"error");
             await new Promise((f) => setTimeout(f, 1000));
             setUploadState("Upload");
             setIsUploadActive(true);
@@ -96,16 +98,16 @@ const HomePage: React.FC = () => {
                         )}
                         {!isUploadActive && (
                             <button className="pt-6" onClick={handleNewFile}>
-                                Upload New File
+                                {i18n.home_upload}
                             </button>
                         )}
                         {downloadActive && (
                             <button className="pt-6" onClick={handleDownload}>
-                                Download
+                                {i18n.home_download}
                             </button>
                         )}
                         <button className="pt-6" onClick={logout}>
-                            Logout
+                            {i18n.home_logout}
                         </button>
                     </div>
                 </div>

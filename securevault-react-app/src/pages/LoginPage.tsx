@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../api/auth';
 import { ILoginUser } from '../models/interfaces/interfaces';
 import { notify } from '../modules/notifications';
+import { i18n } from '../i18n/i18n';
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
@@ -26,11 +27,11 @@ const LoginPage: React.FC = () => {
         await login(loginUser);
 
         if (isAuthenticated) {
-            notify("Login successful", "success");
-            console.log("Logged in!");
+            notify(i18n.login_success, i18n.toastify_success);
+            console.log(i18n.login_success);
             navigate("/");
         } else {
-            notify("Invalid username or password", "error");
+            notify(i18n.login_error, i18n.toastify_error);
         }
     };
 
@@ -43,9 +44,9 @@ const LoginPage: React.FC = () => {
         <div className="App">
             <form onSubmit={submitHandler}>
                 <div className="form-inner rounded-md">
-                    <h2>Login</h2>
+                    <h2>{i18n.login_login}</h2>
                     <div className="form-group">
-                        <label htmlFor="username">Username:</label>
+                        <label htmlFor="username">{i18n.login_username}</label>
                         <input
                             type="text"
                             name="username"
@@ -60,7 +61,7 @@ const LoginPage: React.FC = () => {
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="email">Email: </label>
+                        <label htmlFor="email">{i18n.login_email}</label>
                         <input
                             type="email"
                             name="email"
@@ -75,7 +76,7 @@ const LoginPage: React.FC = () => {
                         />
                     </div>
                     <div className="form-group">
-                        <label htmlFor="password">Password: </label>
+                        <label htmlFor="password">{i18n.login_password}</label>
                         <input
                             type="password"
                             name="password"
@@ -90,7 +91,7 @@ const LoginPage: React.FC = () => {
                         />
                     </div>
                     <input type="submit" value="Submit" />
-                    <button onClick={() => navigate("/signup")}>Sign Up</button>
+                    <button onClick={() => navigate("/signup")}>{i18n.login_signup}</button>
                 </div>
             </form>
         </div>
