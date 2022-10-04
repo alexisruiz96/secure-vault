@@ -2,15 +2,6 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
 import { ILoginUser, User } from '../interfaces/interfaces';
 
-//TODO add this and test it to check it works
-//TODO handle this requests adding a jwt or some kind of token
-
-//TODO: test this
-
-// const timeMax = 30000;
-
-// axios.defaults.baseURL = "http://localhost:4000/";
-
 export class ApiClient {
     private _axios: AxiosInstance;
     constructor(baseUrl: string, timeout: number) {
@@ -102,6 +93,20 @@ export class ApiClient {
         return this._axios({
             method: "get",
             url: "files/salt",
+            params: {
+                username: user,
+            },
+            headers: {
+                Allow: "GET",
+                "Content-Type": "application/json",
+            },
+        });
+    }
+
+    async getData(user: string) {
+        return await this._axios({
+            method: "get",
+            url: "files/download",
             params: {
                 username: user,
             },

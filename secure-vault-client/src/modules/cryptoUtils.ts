@@ -197,7 +197,7 @@ export class CryptoUtil {
         }
     }
 
-    async downloadDataFromUrl(downloadUrl: string, saltData: string) {
+    async downloadDataFromUrl(downloadUrl: string) {
         const cryptoUtil = this;
         const res = await fetch(downloadUrl as string, {
             method: "GET",
@@ -207,7 +207,10 @@ export class CryptoUtil {
                 "Access-Control-Allow-Origin": "*",
             },
         })
-            .then((response) => response.body)
+            .then((response) => {
+                debugger;
+                return response.body;
+            })
             .then((rb) => {
                 if (rb === null) throw new Error("Response body is null");
                 const reader = rb.getReader();
@@ -222,18 +225,11 @@ export class CryptoUtil {
                                 if (done) {
                                     console.log("done", done);
                                     controller.close();
-                                    // saveBlob(doc, `fileName`);
 
                                     return;
                                 }
-                                //TODO only decrypt to be shown on browser and save encrypted on local storage
-                                const decryptedData =
-                                    await cryptoUtil.decryptData(
-                                        value,
-                                        saltData
-                                    );
                                 // Get the data and send it to the browser via the controller
-                                controller.enqueue(decryptedData);
+                                controller.enqueue(value);
                                 // Check chunks by logging to the console
                                 console.log(done, value);
                                 push();
@@ -250,18 +246,7 @@ export class CryptoUtil {
                     .getReader()
                     .read()
                     .then(({ value }) => {
-                        const randomName = this.convertBufferToBase64(
-                            crypto.getRandomValues(new Uint8Array(12))
-                        );
-                        //TODO check file extension
-                        const blob = new Blob([value], { type: "image/png" });
-                        const url = URL.createObjectURL(blob);
-                        const a = document.createElement("a");
-                        a.href = url;
-                        a.download = randomName;
-                        document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
-                        a.click();
-                        a.remove(); //afterwards we remove the element again
+                        localStorage.setItem("vault_data", cryptoUtil.convertBufferToBase64(value as ArrayBuffer));  
                     })
             )
             .then((result) => {

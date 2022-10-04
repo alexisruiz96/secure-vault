@@ -104,15 +104,21 @@ export class SecureVaultClient {
         // clear _auth_token
     }
 
-    async getStorage() {
+    async getStorage() : Promise<AxiosResponse> {
         if (!this._initialized) {
             throw new Error("Client not initialized");
         }
-        console.log("test");
+
+        const response:AxiosResponse = await this._apiClient.getData(this._username);
+        if(response.status === 500) return response;
+        
+        const data = await this._cryptoUtil.downloadDataFromUrl(response.data.url);
+        localStorage.setItem("vault_data_upload_time", response.data.epochtime.toString());
         //download storage from google storage
         //save encrypted file to local storage
         //decrypt the file and show it on the frontend
         //TODO define type of encrypted storage
+        return response;
     }
 
     async setStorage(storage: any | File): Promise<AxiosResponse["data"]> {
@@ -145,9 +151,6 @@ export class SecureVaultClient {
             const formData: FormData = new FormData();
 
             formData.append("myFile", encryptedFile as File);
-            // END ENCRYPT FILE BLOCK
-
-            // formData.append("myFile", file as File);
 
             this.checkAppendedFormData(formData);
             const uploadTime: EpochTimeStamp = new Date().getTime();
@@ -171,11 +174,10 @@ export class SecureVaultClient {
         }
     }
 
-    async downloadStorageToDisk(downloadUrl: string) {
+    async downloadStorageToDisk() {
         if (!this._initialized) {
             throw new Error("Client not initialized");
         }
-        //TODO change download to download from localStorage
 
         const saltDataResponse = await this._apiClient.getDataSalt(
             this._username

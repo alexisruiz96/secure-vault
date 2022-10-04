@@ -119,18 +119,36 @@ export const uploadFile: RequestHandler = async (
     }
 };
 
-export const downloadFile: RequestHandler<{ id: string }> = async (
+/**
+ * 
+ * @param req contains the username to get the file
+ * @param res return signed url to download the file and epochtime of the file
+ * @param _next 
+ * @returns 
+ */
+export const downloadFile: RequestHandler = async (
     req: Request,
     res: Response,
     _next
-) => {
+): Promise<Response> => {
     try {
-        const user = req.body as File;
-
+        const user = req.query as UserName;
+        const response: QueryResult = await pool.query(
+            "SELECT data, epochtime, salt_data FROM USERS WHERE username LIKE $1",
+            [
+                user.username
+            ]
+        );
+        const signedUrl = await generateV4ReadSignedUrl(
+            gc,
+            GOOGLE_STORAGE_BUCKET_NAME,
+            response.rows[0].data
+        );
         //TODO add functionality to return the corresponding file to the user
-        return res.status(201).json(i18n.fileSuccessDownloaded);
+        return res.status(201).json(
+            {message: i18n.fileSuccessDownloaded, url: signedUrl, epochtime: response.rows[0].epochtime, salt_data: response.rows[0].salt_data});
     } catch (error) {
-        return res.status(500).json(i18n.errorServerDownloadingFile);
+        return res.status(500).json({message: i18n.errorServerDownloadingFile});
     }
 };
 

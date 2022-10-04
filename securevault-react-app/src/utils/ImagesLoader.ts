@@ -17,6 +17,7 @@ const images: ImageLoaderProps = {
     items: {
         copy: copy_png,
         doc: doc_png,
+        json: copy_png,
         file_download: file_download_png,
         folder: folder_png,
         jpeg: jpeg_png,

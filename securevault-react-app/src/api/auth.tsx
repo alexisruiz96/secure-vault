@@ -58,6 +58,10 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
         });
 
         if (response.status === 200) {
+            const res = await secureVault.getStorage();
+            if (res.status === 200) {
+                console.log("getStorage");
+            }
             setUser({
                 username: response.data.username,
                 password: "",

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { secureVault } from '../';
 import { useAuth } from '../api/auth';
@@ -25,6 +25,20 @@ const HomePage: React.FC = () => {
         | null
     >("Upload");
     const [isUploadActive, setIsUploadActive] = useState(true);
+
+    // useEffect(() => {
+    //     debugger;
+    //     const getStorage = async () =>{
+    //         const response = await secureVault.getStorage();
+    //         if (response.status === 200) {
+    //             setDownloadActive(true);
+    //             setDownloadPage(response.data.page);
+    //         }
+    //     } 
+    //     getStorage().catch((error) => {
+    //         console.log(error);
+    //     });
+    // }, []);
 
     const handleUpload = async () => {
         if (uploadState === "Uploading") return;
@@ -63,7 +77,7 @@ const HomePage: React.FC = () => {
         try {
             if (downloadPage === null)
                 throw new Error("Download is not available");
-            secureVault.downloadStorageToDisk(downloadPage);
+            secureVault.downloadStorageToDisk();
         } catch (error) {
             console.error(error);
         }
