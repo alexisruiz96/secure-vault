@@ -1,10 +1,11 @@
-import { AxiosResponse } from 'axios';
-import { createContext, useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { AxiosResponse } from "axios";
+import { createContext, useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-import { secureVault } from '../index';
-import { ILoginUser } from '../models/interfaces/interfaces';
-import { i18n } from '../i18n/i18n';
+import { secureVault } from "../index";
+import { ILoginUser } from "../models/interfaces/interfaces";
+import { i18n } from "../i18n/i18n";
+import { notify } from "../modules/notifications";
 
 interface Props {
     children: React.ReactNode[] | React.ReactNode;
@@ -58,10 +59,17 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
         });
 
         if (response.status === 200) {
-            const res = await secureVault.getStorage();
-            if (res.status === 200) {
-                console.log("getStorage");
-            }
+            secureVault
+                .getStorage()
+                .then((res) => {
+                    if (res.status === 201) {
+                        console.log("getStorage");
+                    }
+                })
+                .catch((error) => {
+                    notify(i18n.storage_error, "error");
+                    console.error(error);
+                });
             setUser({
                 username: response.data.username,
                 password: "",

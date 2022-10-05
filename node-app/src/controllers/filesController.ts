@@ -193,3 +193,34 @@ export const getDataSalt: RequestHandler = async (
             .json({ isLogged: false, message: i18n.errorUsername });
     }
 };
+
+export const checkUploadTime: RequestHandler = async (
+    req: Request,
+    res: Response,
+    _next
+): Promise<Response> => {
+    try {
+        const params = req.query;
+
+        const response: QueryResult = await pool.query(
+            "SELECT epochtime FROM USERS WHERE username LIKE $1;",
+            [params.username]
+        );
+        
+        const isLastUpload = (parseInt(params.uploadtime as string) > parseInt(response.rows[0].epochtime as string));
+        
+        if(!isLastUpload){
+            return res.status(200).json({
+                isLastUpload: isLastUpload,
+                message: i18n.storage_time_error,
+            });
+        }
+        return res.status(200).json({
+            isLastUpload: isLastUpload,
+            message: i18n.storage_time_success,
+        });
+    } catch (error) {
+        return res
+            .status(500).json({ message: i18n.storage_time_check_error });
+    }
+};

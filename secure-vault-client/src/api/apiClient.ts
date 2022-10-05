@@ -104,11 +104,26 @@ export class ApiClient {
     }
 
     async getData(user: string) {
-        return await this._axios({
+        return this._axios({
             method: "get",
             url: "files/download",
             params: {
                 username: user,
+            },
+            headers: {
+                Allow: "GET",
+                "Content-Type": "application/json",
+            },
+        });
+    }
+
+    async checkIsLastUpload(user:string, uploadTime: number) {
+        return this._axios({
+            method: "get",
+            url: "files/checkuploadtime",
+            params: {
+                username: user,
+                uploadtime: uploadTime,
             },
             headers: {
                 Allow: "GET",

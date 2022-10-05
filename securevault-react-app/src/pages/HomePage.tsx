@@ -47,21 +47,24 @@ const HomePage: React.FC = () => {
         try {
             if (file === null) throw new Error("File is empty");
             
+            //TODO define response
             const response = await secureVault.setStorage(file);
-
+            if(response.status===500) throw new Error(response.data.message);
+            
             //TODO define type/interface on library for data
-            setDownloadPage(response.downloadPage);
+            setDownloadPage(response.data.downloadPage);
             setUploadState("Upload Successful");
             notify(i18n.file_upload_success,"success");
             await new Promise((f) => setTimeout(f, 1000));
-            setDownloadActive(response.downloadActive);
+            setDownloadActive(response.data.downloadActive);
             setUploadState("Upload");
             setIsUploadActive(false);
             console.log(i18n.file_upload_success);
-        } catch (error) {
+        } catch (error : any) {
             console.error(error);
             setUploadState("Upload Failed");
             notify(i18n.file_upload_error,"error");
+            notify(error.message,"error");
             await new Promise((f) => setTimeout(f, 1000));
             setUploadState("Upload");
             setIsUploadActive(true);

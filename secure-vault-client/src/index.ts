@@ -104,16 +104,23 @@ export class SecureVaultClient {
         // clear _auth_token
     }
 
-    async getStorage() : Promise<AxiosResponse> {
+    async getStorage(): Promise<AxiosResponse> {
         if (!this._initialized) {
             throw new Error("Client not initialized");
         }
 
-        const response:AxiosResponse = await this._apiClient.getData(this._username);
-        if(response.status === 500) return response;
-        
-        const data = await this._cryptoUtil.downloadDataFromUrl(response.data.url);
-        localStorage.setItem("vault_data_upload_time", response.data.epochtime.toString());
+        const response: AxiosResponse = await this._apiClient.getData(
+            this._username
+        );
+        if (response.status === 500) return response;
+
+        const data = await this._cryptoUtil.downloadDataFromUrl(
+            response.data.url
+        );
+        localStorage.setItem(
+            "vault_data_upload_time",
+            response.data.epochtime.toString()
+        );
         //download storage from google storage
         //save encrypted file to local storage
         //decrypt the file and show it on the frontend
@@ -121,57 +128,74 @@ export class SecureVaultClient {
         return response;
     }
 
-    async setStorage(storage: any | File): Promise<AxiosResponse["data"]> {
+    //TODO add response type
+    async setStorage(storage: File): Promise<AxiosResponse> {
         if (!this._initialized) {
             throw new Error("Client not initialized");
         }
         console.log("setStorage");
 
-        //TODO add check if storage is file
-        if (storage instanceof File) {
-            const fileBinaryData = await storage?.arrayBuffer();
-            const encryptedDataFileStringify =
-                await this._cryptoUtil.encryptData(
-                    fileBinaryData as ArrayBuffer
-                );
+        const uploadTime: EpochTimeStamp = new Date().getTime();
+        const isLastUploadResponse: AxiosResponse =
+            await this._apiClient.checkIsLastUpload(this._username, uploadTime);
 
-            const encryptedDataFileJSON = JSON.parse(
-                encryptedDataFileStringify as string
-            );
-            const encryptedDataBuffer = this._cryptoUtil.convertBase64ToBuffer(
-                encryptedDataFileJSON[0]?.encryptedData
-            );
-
-            const encryptedFile = new File(
-                [encryptedDataBuffer],
-                storage?.name as string,
-                { type: storage?.type }
-            );
-
-            const formData: FormData = new FormData();
-
-            formData.append("myFile", encryptedFile as File);
-
-            this.checkAppendedFormData(formData);
-            const uploadTime: EpochTimeStamp = new Date().getTime();
-            const response: AxiosResponse  =
-                await this._apiClient.uploadData(
-                    formData,
-                    this._username,
-                    encryptedDataFileJSON[0]?.iv,
-                    uploadTime
-                );
-            if(response.status === 201){
-                const encoder = new TextEncoder();
-                const vault_type = this._cryptoUtil.convertBufferToBase64(encoder.encode(storage?.type as string));
-
-                localStorage.setItem("vault_data", this._cryptoUtil.convertBufferToBase64(encryptedDataBuffer as ArrayBuffer));
-                localStorage.setItem("vault_data_type", vault_type);
-                localStorage.setItem("vault_data_upload_time", uploadTime.toString());
-            }
-
-            return  response["data"] as AxiosResponse["data"];
+        if (!isLastUploadResponse.data.isLastUpload) {
+            isLastUploadResponse.status = 500;
+            return isLastUploadResponse;
         }
+        console.log(isLastUploadResponse.data.message);
+        //TODO check epochtime de la base de datos para ese username
+        //TODO add check if storage is file
+
+        const fileBinaryData = await storage?.arrayBuffer();
+        const encryptedDataFileStringify = await this._cryptoUtil.encryptData(
+            fileBinaryData as ArrayBuffer
+        );
+
+        const encryptedDataFileJSON = JSON.parse(
+            encryptedDataFileStringify as string
+        );
+        const encryptedDataBuffer = this._cryptoUtil.convertBase64ToBuffer(
+            encryptedDataFileJSON[0]?.encryptedData
+        );
+
+        const encryptedFile = new File(
+            [encryptedDataBuffer],
+            storage?.name as string,
+            { type: storage?.type }
+        );
+
+        const formData: FormData = new FormData();
+
+        formData.append("myFile", encryptedFile as File);
+
+        this.checkAppendedFormData(formData);
+        const response: AxiosResponse = await this._apiClient.uploadData(
+            formData,
+            this._username,
+            encryptedDataFileJSON[0]?.iv,
+            uploadTime
+        );
+        if (response.status === 201) {
+            const encoder = new TextEncoder();
+            const vault_type = this._cryptoUtil.convertBufferToBase64(
+                encoder.encode(storage?.type as string)
+            );
+
+            localStorage.setItem(
+                "vault_data",
+                this._cryptoUtil.convertBufferToBase64(
+                    encryptedDataBuffer as ArrayBuffer
+                )
+            );
+            localStorage.setItem("vault_data_type", vault_type);
+            localStorage.setItem(
+                "vault_data_upload_time",
+                uploadTime.toString()
+            );
+        }
+
+        return response;
     }
 
     async downloadStorageToDisk() {
@@ -185,7 +209,6 @@ export class SecureVaultClient {
         const saltData = saltDataResponse.data.salt;
         // this._cryptoUtil.downloadDataFromUrl(downloadUrl, saltData);
         this._cryptoUtil.downloadDataFromLocalStorage(saltData);
-        
     }
 
     private checkAppendedFormData(formData: FormData) {

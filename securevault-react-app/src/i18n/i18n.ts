@@ -35,4 +35,6 @@ export const i18n = {
     signup_password : "Password: ",
     signup_signup : "Sign Up",
     signup_login : "Login",
+
+    storage_error : "Error getting storage",
 };

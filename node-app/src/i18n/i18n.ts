@@ -35,4 +35,8 @@ export const i18n = {
     errorUsername: "Username Error",
     loginSuccess: "Login Success",
     loginError: "Invalid username or password",
+
+    storage_time_error: "Storage needs to be updated",
+    storage_time_success: "Storage can be updated",
+    storage_time_check_error: "Error checking storage last upload time",
 };

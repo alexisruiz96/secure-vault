@@ -13,7 +13,7 @@ export declare class SecureVaultClient {
     private _username;
     constructor(options: Options);
     initialize(user: ILoginUser): Promise<AxiosResponse>;
-    signUp(user: User): Promise<void>;
+    signUp(user: User): Promise<number>;
     /**
      * Logins secure vault client
      * @param user
@@ -21,8 +21,8 @@ export declare class SecureVaultClient {
      */
     login(user: ILoginUser): Promise<AxiosResponse>;
     logout(): Promise<void>;
-    getStorage(): Promise<void>;
-    setStorage(storage: any | File): Promise<AxiosResponse["data"]>;
-    downloadStorageToDisk(downloadUrl: string): Promise<void>;
+    getStorage(): Promise<AxiosResponse>;
+    setStorage(storage: File): Promise<AxiosResponse>;
+    downloadStorageToDisk(): Promise<void>;
     private checkAppendedFormData;
 }

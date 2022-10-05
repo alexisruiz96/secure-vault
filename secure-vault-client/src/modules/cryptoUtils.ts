@@ -181,7 +181,6 @@ export class CryptoUtil {
                     encryptedData
                 );
             } catch (error) {
-                debugger;
                 let errorMessage = "Failed authentication.";
                 if (error instanceof Error) {
                     if (error.toString() === "Error: Cipher job failed") {
@@ -208,7 +207,6 @@ export class CryptoUtil {
             },
         })
             .then((response) => {
-                debugger;
                 return response.body;
             })
             .then((rb) => {

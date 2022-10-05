@@ -2,7 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import passport from 'passport';
 
-import { deleteFile, downloadFile, getDataSalt, uploadFile } from '../controllers/filesController';
+import { deleteFile, downloadFile, getDataSalt, uploadFile, checkUploadTime } from '../controllers/filesController';
 
 const filesRouter = Router();
 
@@ -27,6 +27,12 @@ filesRouter.get(
     "/salt",
     passport.authorize("jwt", { session: false }),
     getDataSalt
+);
+
+filesRouter.get(
+    "/checkuploadtime",
+    passport.authorize("jwt", { session: false }),
+    checkUploadTime
 );
 
 // discuss if this is necessary
