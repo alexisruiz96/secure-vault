@@ -10,11 +10,16 @@ import {
     VaultKey,
 } from "./interfaces/interfaces";
 import { CryptoUtil } from "./modules/cryptoUtils";
+import fs from "fs";
 
 export interface Options {
     apiOptions: IApiOptions;
     keyPrefixes: IKeyPrefixes;
     cryptoOptions: ICryptoOptions;
+}
+export interface storageContainer {
+    epochtime: number;
+    data: string;
 }
 
 export class SecureVaultClient {
@@ -35,7 +40,7 @@ export class SecureVaultClient {
         this._username = "";
         localStorage.removeItem("vault_data");
         localStorage.removeItem("vault_data_type");
-        localStorage.removeItem("vault_data_upload_time");
+        localStorage.removeItem("vault_data_epochtime");
     }
 
     async initialize(user: ILoginUser): Promise<AxiosResponse> {
@@ -97,7 +102,7 @@ export class SecureVaultClient {
         this._username = "";
         localStorage.removeItem("vault_data");
         localStorage.removeItem("vault_data_type");
-        localStorage.removeItem("vault_data_upload_time");
+        localStorage.removeItem("vault_data_epochtime");
         this._initialized = false;
 
         // logout from vault
@@ -108,6 +113,10 @@ export class SecureVaultClient {
         if (!this._initialized) {
             throw new Error("Client not initialized");
         }
+        let storageContainer = {
+            epochtime: 0,
+            data: "",
+        };
 
         const response: AxiosResponse = await this._apiClient.getData(
             this._username
@@ -115,12 +124,21 @@ export class SecureVaultClient {
         if (response.status === 500) return response;
 
         const data = await this._cryptoUtil.downloadDataFromUrl(
-            response.data.url
+            response.data.url,
+            response.data.salt_data
         );
-        localStorage.setItem(
-            "vault_data_upload_time",
-            response.data.epochtime.toString()
-        );
+        storageContainer.epochtime = response.data.epochtime;
+        debugger;
+        //TEST
+        const test = new File([data], "test.json", {
+            type: "application/json",
+        });
+        const val = await test.text();
+        storageContainer.data = val;
+        console.log(val);
+
+        //TEST
+        response.data["storage"] = storageContainer;
         //download storage from google storage
         //save encrypted file to local storage
         //decrypt the file and show it on the frontend
@@ -189,10 +207,7 @@ export class SecureVaultClient {
                 )
             );
             localStorage.setItem("vault_data_type", vault_type);
-            localStorage.setItem(
-                "vault_data_upload_time",
-                uploadTime.toString()
-            );
+            localStorage.setItem("vault_data_epochtime", uploadTime.toString());
         }
 
         return response;
