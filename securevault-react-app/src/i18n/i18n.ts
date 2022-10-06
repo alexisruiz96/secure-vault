@@ -1,7 +1,8 @@
 export const i18n = {
     auth_error : "useAuth must be used within a AuthProvider",
     
-    dropzone_error : "Only png & json files are allowed",
+    dropzone_error : "Only json files are allowed",
+    // dropzone_error : "Only png & json files are allowed",
     dropzone_error_types : "Sorry, This app only supports the described types",
     dropzone_info : "Drag 'n' drop some files here, or click to select files",
 

@@ -6,7 +6,7 @@ import { i18n } from '../i18n/i18n';
 
 const MyDropzone: React.FC<{ setFile: Dispatch<File> }> = ({ setFile }) => {
     const acceptedFileTypes: Accept = {
-        "image/png": [".png"],
+        // "image/png": [".png"],
         "application/json": [".json"],
     };
     const inputFile = useRef<HTMLInputElement>(null);

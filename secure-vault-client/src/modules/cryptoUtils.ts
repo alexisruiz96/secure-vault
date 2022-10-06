@@ -1,8 +1,8 @@
-import * as scryptPbkdf from 'scrypt-pbkdf';
+import * as scryptPbkdf from "scrypt-pbkdf";
 
-import * as base64 from '@juanelas/base64';
+import * as base64 from "@juanelas/base64";
 
-import { ICryptoOptions } from '../interfaces/interfaces';
+import { ICryptoOptions } from "../interfaces/interfaces";
 
 interface EncryptedData {
     base64IV: string;
@@ -196,8 +196,9 @@ export class CryptoUtil {
         }
     }
 
-    async downloadDataFromUrl(downloadUrl: string) {
+    async downloadDataFromUrl(downloadUrl: string, saltData: string) {
         const cryptoUtil = this;
+        let data: string = "";
         const res = await fetch(downloadUrl as string, {
             method: "GET",
             headers: {
@@ -226,8 +227,13 @@ export class CryptoUtil {
 
                                     return;
                                 }
+                                const decryptedData =
+                                    await cryptoUtil.decryptData(
+                                        value,
+                                        saltData
+                                    );
                                 // Get the data and send it to the browser via the controller
-                                controller.enqueue(value);
+                                controller.enqueue(decryptedData);
                                 // Check chunks by logging to the console
                                 console.log(done, value);
                                 push();
@@ -244,7 +250,7 @@ export class CryptoUtil {
                     .getReader()
                     .read()
                     .then(({ value }) => {
-                        localStorage.setItem("vault_data", cryptoUtil.convertBufferToBase64(value as ArrayBuffer));  
+                        data = value;
                     })
             )
             .then((result) => {
@@ -252,6 +258,7 @@ export class CryptoUtil {
                 console.log(result);
             })
             .catch((e) => console.error(e.message));
+        return data;
         // console.log(res);
     }
 

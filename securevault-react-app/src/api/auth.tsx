@@ -62,8 +62,13 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
             secureVault
                 .getStorage()
                 .then((res) => {
+                    debugger;
                     if (res.status === 201) {
-                        console.log("getStorage");
+                        localStorage.setItem(
+                            "vault_data_epochtime",
+                            res.data.storage.epochtime
+                        );
+                        console.log("Storage loaded");
                     }
                 })
                 .catch((error) => {
