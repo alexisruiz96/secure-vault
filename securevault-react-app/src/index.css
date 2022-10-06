@@ -111,9 +111,10 @@ button:hover {
 
 .welcome {
     width: 100%;
-    max-width: 480px;
+    max-width: 800px;
     background-color: #FFF;
     padding: 10px 15px;
+    height: 80%;
 }
 
 .welcome h2 {

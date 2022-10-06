@@ -38,7 +38,7 @@ const MyDropzone: React.FC<{ setFile: Dispatch<File> }> = ({ setFile }) => {
         >
             <div
                 {...getRootProps()}
-                className="w-full h-80 rounded-md cursor-pointer focus:outline-none bg-slate-200"
+                className="w-full h-40 rounded-md cursor-pointer focus:outline-none bg-slate-200"
             >
                 <input {...getInputProps()} ref={inputFile} />
 

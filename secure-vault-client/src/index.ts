@@ -156,8 +156,6 @@ export class SecureVaultClient {
             return isLastUploadResponse;
         }
         console.log(isLastUploadResponse.data.message);
-        //TODO check epochtime de la base de datos para ese username
-        //TODO add check if storage is file
 
         const fileBinaryData = await storage?.arrayBuffer();
         const encryptedDataFileStringify = await this._cryptoUtil.encryptData(
@@ -190,6 +188,11 @@ export class SecureVaultClient {
         );
         if (response.status === 201) {
             localStorage.setItem("vault_data_epochtime", uploadTime.toString());
+            let fileContent = await storage.text();
+            response.data["storage"] = fileContent;
+            console.log(fileContent);
+            //TODO add storage to json object
+            //TODO add to response the storage
         }
 
         return response;

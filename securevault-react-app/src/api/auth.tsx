@@ -17,6 +17,7 @@ export type AuthContextType = {
     login: (user: ILoginUser) => Promise<boolean>;
     logout: () => void;
     error: string;
+    storage: string | null;
 };
 
 const defaultIUserLogin = { username: "", password: "", salt: "" };
@@ -26,6 +27,7 @@ const defaultContext: AuthContextType = {
     login: (_user: ILoginUser) => Promise.resolve(false),
     logout: () => {},
     error: "",
+    storage: "",
 };
 
 export const AuthContext = createContext<AuthContextType | null>(
@@ -48,6 +50,7 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
     });
     const [error, setError] = useState("");
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [storage, setStorage] = useState<string | null>(null);
     const navigate = useNavigate();
 
     const login = async (details: ILoginUser) => {
@@ -68,6 +71,7 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
                             "vault_data_epochtime",
                             res.data.storage.epochtime
                         );
+                        setStorage(JSON.stringify(JSON.parse(res.data.storage.data), undefined,2));
                         console.log("Storage loaded");
                     }
                 })
@@ -94,6 +98,7 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
         setUser(defaultIUserLogin);
         secureVault.logout();
         localStorage.removeItem("vault_data_epochtime");
+        setStorage(null);
         navigate("/login");
     };
 
@@ -105,6 +110,7 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
                 login,
                 logout,
                 error,
+                storage,
             }}
         >
             {children}
