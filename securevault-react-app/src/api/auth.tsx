@@ -14,7 +14,7 @@ interface Props {
 export type AuthContextType = {
     isAuthenticated: boolean;
     user: ILoginUser;
-    login: (user: ILoginUser) => void;
+    login: (user: ILoginUser) => Promise<boolean>;
     logout: () => void;
     error: string;
 };
@@ -23,7 +23,7 @@ const defaultIUserLogin = { username: "", password: "", salt: "" };
 const defaultContext: AuthContextType = {
     isAuthenticated: false,
     user: defaultIUserLogin,
-    login: (_user: ILoginUser) => {},
+    login: (_user: ILoginUser) => Promise.resolve(false),
     logout: () => {},
     error: "",
 };
@@ -81,15 +81,19 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
             });
             //TODO: authenticate with jwt
             setIsAuthenticated(true);
+            return true;
         } else if (response.status === 401) {
             setError(response.data);
             setIsAuthenticated(false);
+            return false;
         }
+        return false;
     };
 
     const logout = () => {
         setUser(defaultIUserLogin);
         secureVault.logout();
+        localStorage.removeItem("vault_data_epochtime");
         navigate("/login");
     };
 

@@ -8,7 +8,7 @@ import { i18n } from '../i18n/i18n';
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
-    const { login, isAuthenticated } = useAuth();
+    const { login} = useAuth();
 
     const [details, setDetails] = useState({
         username: "",
@@ -24,7 +24,7 @@ const LoginPage: React.FC = () => {
         };
         
         //Note: async login function
-        await login(loginUser);
+        const isAuthenticated = await login(loginUser);
 
         if (isAuthenticated) {
             notify(i18n.login_success, i18n.toastify_success);

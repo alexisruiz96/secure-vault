@@ -38,9 +38,6 @@ export class SecureVaultClient {
             options.apiOptions.timeout
         );
         this._username = "";
-        localStorage.removeItem("vault_data");
-        localStorage.removeItem("vault_data_type");
-        localStorage.removeItem("vault_data_epochtime");
     }
 
     async initialize(user: ILoginUser): Promise<AxiosResponse> {
@@ -100,9 +97,6 @@ export class SecureVaultClient {
         this._apiClient.logout();
         this._cryptoUtil.encCryptoKey = "";
         this._username = "";
-        localStorage.removeItem("vault_data");
-        localStorage.removeItem("vault_data_type");
-        localStorage.removeItem("vault_data_epochtime");
         this._initialized = false;
 
         // logout from vault
@@ -195,18 +189,6 @@ export class SecureVaultClient {
             uploadTime
         );
         if (response.status === 201) {
-            const encoder = new TextEncoder();
-            const vault_type = this._cryptoUtil.convertBufferToBase64(
-                encoder.encode(storage?.type as string)
-            );
-
-            localStorage.setItem(
-                "vault_data",
-                this._cryptoUtil.convertBufferToBase64(
-                    encryptedDataBuffer as ArrayBuffer
-                )
-            );
-            localStorage.setItem("vault_data_type", vault_type);
             localStorage.setItem("vault_data_epochtime", uploadTime.toString());
         }
 

@@ -15,6 +15,8 @@ const root = ReactDOM.createRoot(
     </React.StrictMode>
 );
 
+
+localStorage.removeItem("vault_data_epochtime");
 export const secureVault = new SecureVaultClient({
     apiOptions: {baseUrl: 'http://localhost:4000', timeout: 30000},
     keyPrefixes: prefixSubKeys,
