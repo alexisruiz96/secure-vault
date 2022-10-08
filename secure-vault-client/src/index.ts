@@ -11,13 +11,14 @@ import {
 } from "./interfaces/interfaces";
 import { CryptoUtil } from "./modules/cryptoUtils";
 import fs from "fs";
+import { EventSourcePolyfill } from "event-source-polyfill";
 
 export interface Options {
     apiOptions: IApiOptions;
     keyPrefixes: IKeyPrefixes;
     cryptoOptions: ICryptoOptions;
 }
-export interface storageContainer {
+export interface StorageContainer {
     epochtime: number;
     data: string;
 }
@@ -107,14 +108,16 @@ export class SecureVaultClient {
         if (!this._initialized) {
             throw new Error("Client not initialized");
         }
+
+        const response: AxiosResponse = await this._apiClient.getData(
+            this._username
+        );
+
         let storageContainer = {
             epochtime: 0,
             data: "",
         };
 
-        const response: AxiosResponse = await this._apiClient.getData(
-            this._username
-        );
         if (response.status === 500) return response;
 
         const data = await this._cryptoUtil.downloadDataFromUrl(
@@ -122,7 +125,6 @@ export class SecureVaultClient {
             response.data.salt_data
         );
         storageContainer.epochtime = response.data.epochtime;
-        debugger;
         //TEST
         const test = new File([data], "test.json", {
             type: "application/json",
@@ -209,6 +211,51 @@ export class SecureVaultClient {
         const saltData = saltDataResponse.data.salt;
         // this._cryptoUtil.downloadDataFromUrl(downloadUrl, saltData);
         this._cryptoUtil.downloadDataFromLocalStorage(saltData);
+    }
+
+    async subscribeStorage(): Promise<EventSourcePolyfill> {
+        if (!this._initialized) {
+            throw new Error("Client not initialized");
+        }
+        const headers = await this._apiClient.getAuthorizationHeadersStorage(
+            this._username
+        );
+        const eventSource = new EventSourcePolyfill(this._options.apiOptions.baseUrl + "/files/storageSubscription", headers);
+
+        return eventSource;
+    }
+    async unsubscribeStorage(eventSource: EventSourcePolyfill) {
+        if (!this._initialized) {
+            throw new Error("Client not initialized");
+        }
+        eventSource.close();
+    }
+
+    async getReadableStorage(response:any): Promise<StorageContainer> {
+        if (!this._initialized) {
+            throw new Error("Client not initialized");
+        }
+        let storageContainer = {
+            epochtime: 0,
+            data: "",
+        };
+
+        response.data = JSON.parse(response.data);
+
+        const data = await this._cryptoUtil.downloadDataFromUrl(
+            response.data.url,
+            response.data.salt_data
+        );
+        storageContainer.epochtime = response.data.epochtime;
+        
+        //TEST
+        const file = new File([data], "file.json", {
+            type: "application/json",
+        });
+        const val = await file.text();
+        storageContainer.data = val;
+
+        return storageContainer;
     }
 
     private checkAppendedFormData(formData: FormData) {

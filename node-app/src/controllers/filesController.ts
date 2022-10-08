@@ -1,18 +1,20 @@
-import { Request, RequestHandler, Response } from 'express';
-import { createReadStream } from 'fs';
-import path from 'path';
-import { QueryResult } from 'pg';
-import { pipeline } from 'stream/promises';
+import { Request, RequestHandler, Response } from "express";
+import { createReadStream } from "fs";
+import path from "path";
+import { QueryResult } from "pg";
+import { pipeline } from "stream/promises";
 
-import { GetSignedUrlConfig, Storage } from '@google-cloud/storage';
+import { GetSignedUrlConfig, Storage } from "@google-cloud/storage";
 
-import { pool } from '../database';
-import { i18n } from '../i18n/i18n';
-import { UserName } from '../models/userModel';
+import { pool } from "../database";
+import { i18n } from "../i18n/i18n";
+import { UserName } from "../models/userModel";
 import {
-    GOOGLE_STORAGE_BUCKET_NAME, GOOGLE_STORAGE_BUCKET_URL, GOOGLE_STORAGE_PROJECT_ID,
-    SERVICE_ACCOUNT_KEY_FILE
-} from '../utils/config';
+    GOOGLE_STORAGE_BUCKET_NAME,
+    GOOGLE_STORAGE_BUCKET_URL,
+    GOOGLE_STORAGE_PROJECT_ID,
+    SERVICE_ACCOUNT_KEY_FILE,
+} from "../utils/config";
 
 const USERS: File[] = [];
 
@@ -90,7 +92,7 @@ export const uploadFile: RequestHandler = async (
                                 filename_user,
                                 req.headers.saltdata,
                                 req.headers.username,
-                                parseInt(req.headers.uploadtime as string)
+                                parseInt(req.headers.uploadtime as string),
                             ]
                         );
                         const signedUrl = await generateV4ReadSignedUrl(
@@ -120,11 +122,11 @@ export const uploadFile: RequestHandler = async (
 };
 
 /**
- * 
+ *
  * @param req contains the username to get the file
  * @param res return signed url to download the file and epochtime of the file
- * @param _next 
- * @returns 
+ * @param _next
+ * @returns
  */
 export const downloadFile: RequestHandler = async (
     req: Request,
@@ -135,9 +137,7 @@ export const downloadFile: RequestHandler = async (
         const user = req.query as UserName;
         const response: QueryResult = await pool.query(
             "SELECT data, epochtime, salt_data FROM USERS WHERE username LIKE $1",
-            [
-                user.username
-            ]
+            [user.username]
         );
         const signedUrl = await generateV4ReadSignedUrl(
             gc,
@@ -145,10 +145,60 @@ export const downloadFile: RequestHandler = async (
             response.rows[0].data
         );
         //TODO add functionality to return the corresponding file to the user
-        return res.status(201).json(
-            {message: i18n.fileSuccessDownloaded, url: signedUrl, epochtime: response.rows[0].epochtime, salt_data: response.rows[0].salt_data});
+        return res.status(201).json({
+            message: i18n.fileSuccessDownloaded,
+            url: signedUrl,
+            epochtime: response.rows[0].epochtime,
+            salt_data: response.rows[0].salt_data,
+        });
     } catch (error) {
-        return res.status(500).json({message: i18n.errorServerDownloadingFile});
+        return res
+            .status(500)
+            .json({ message: i18n.errorServerDownloadingFile });
+    }
+};
+
+export const subscribeStorage: RequestHandler = async (
+    req: Request,
+    res: Response,
+    _next
+) => {
+    try {
+        res.set({
+            "Cache-Control": "no-cache",
+            "Content-Type": "text/event-stream",
+            "Connection": "keep-alive",
+        });
+        res.flushHeaders();
+
+        // Tell the client to retry every 10 seconds if connectivity is lost
+        res.write("retry: 10000\n\n");
+
+        const user = req.headers.username as string;
+        const response: QueryResult = await pool.query(
+            "SELECT data, epochtime, salt_data FROM USERS WHERE username LIKE $1",
+            [user]
+        );
+        const signedUrl = await generateV4ReadSignedUrl(
+            gc,
+            GOOGLE_STORAGE_BUCKET_NAME,
+            response.rows[0].data
+        );
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        res.write(
+            `data: ${JSON.stringify({
+                message: i18n.fileSuccessDownloaded,
+                url: signedUrl,
+                epochtime: response.rows[0].epochtime,
+                salt_data: response.rows[0].salt_data,
+            })}\n\n`
+        );
+        // Emit an SSE that contains the current 'count' as a string
+        
+        res.flushHeaders();
+        
+    } catch (error) {
+        res.write(`message: ${i18n.storage_subscription_error}\n\n`);
     }
 };
 
@@ -206,10 +256,12 @@ export const checkUploadTime: RequestHandler = async (
             "SELECT epochtime FROM USERS WHERE username LIKE $1;",
             [params.username]
         );
-        
-        const isLastUpload = (parseInt(params.uploadtime as string) > parseInt(response.rows[0].epochtime as string));
-        
-        if(!isLastUpload){
+
+        const isLastUpload =
+            parseInt(params.uploadtime as string) >
+            parseInt(response.rows[0].epochtime as string);
+
+        if (!isLastUpload) {
             return res.status(200).json({
                 isLastUpload: isLastUpload,
                 message: i18n.storage_time_error,
@@ -220,7 +272,6 @@ export const checkUploadTime: RequestHandler = async (
             message: i18n.storage_time_success,
         });
     } catch (error) {
-        return res
-            .status(500).json({ message: i18n.storage_time_check_error });
+        return res.status(500).json({ message: i18n.storage_time_check_error });
     }
 };

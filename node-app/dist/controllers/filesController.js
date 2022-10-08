@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDataSalt = exports.deleteFile = exports.downloadFile = exports.uploadFile = void 0;
+exports.checkUploadTime = exports.getDataSalt = exports.deleteFile = exports.subscribeStorage = exports.downloadFile = exports.uploadFile = void 0;
 const fs_1 = require("fs");
 const path_1 = __importDefault(require("path"));
 const promises_1 = require("stream/promises");
@@ -76,7 +76,7 @@ const uploadFile = (req, res, _next) => __awaiter(void 0, void 0, void 0, functi
                     filename_user,
                     req.headers.saltdata,
                     req.headers.username,
-                    parseInt(req.headers.uploadtime)
+                    parseInt(req.headers.uploadtime),
                 ]);
                 const signedUrl = yield generateV4ReadSignedUrl(gc, config_1.GOOGLE_STORAGE_BUCKET_NAME, filename_user);
                 res.status(201).json({
@@ -98,17 +98,61 @@ const uploadFile = (req, res, _next) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.uploadFile = uploadFile;
+/**
+ *
+ * @param req contains the username to get the file
+ * @param res return signed url to download the file and epochtime of the file
+ * @param _next
+ * @returns
+ */
 const downloadFile = (req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = req.body;
+        const user = req.query;
+        const response = yield database_1.pool.query("SELECT data, epochtime, salt_data FROM USERS WHERE username LIKE $1", [user.username]);
+        const signedUrl = yield generateV4ReadSignedUrl(gc, config_1.GOOGLE_STORAGE_BUCKET_NAME, response.rows[0].data);
         //TODO add functionality to return the corresponding file to the user
-        return res.status(201).json(i18n_1.i18n.fileSuccessDownloaded);
+        return res.status(201).json({
+            message: i18n_1.i18n.fileSuccessDownloaded,
+            url: signedUrl,
+            epochtime: response.rows[0].epochtime,
+            salt_data: response.rows[0].salt_data,
+        });
     }
     catch (error) {
-        return res.status(500).json(i18n_1.i18n.errorServerDownloadingFile);
+        return res
+            .status(500)
+            .json({ message: i18n_1.i18n.errorServerDownloadingFile });
     }
 });
 exports.downloadFile = downloadFile;
+const subscribeStorage = (req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        res.set({
+            "Cache-Control": "no-cache",
+            "Content-Type": "text/event-stream",
+            "Connection": "keep-alive",
+        });
+        res.flushHeaders();
+        // Tell the client to retry every 10 seconds if connectivity is lost
+        res.write("retry: 10000\n\n");
+        const user = req.headers.username;
+        const response = yield database_1.pool.query("SELECT data, epochtime, salt_data FROM USERS WHERE username LIKE $1", [user]);
+        const signedUrl = yield generateV4ReadSignedUrl(gc, config_1.GOOGLE_STORAGE_BUCKET_NAME, response.rows[0].data);
+        yield new Promise((resolve) => setTimeout(resolve, 1000));
+        res.write(`data: ${JSON.stringify({
+            message: i18n_1.i18n.fileSuccessDownloaded,
+            url: signedUrl,
+            epochtime: response.rows[0].epochtime,
+            salt_data: response.rows[0].salt_data,
+        })}\n\n`);
+        // Emit an SSE that contains the current 'count' as a string
+        res.flushHeaders();
+    }
+    catch (error) {
+        res.write(`message: ${i18n_1.i18n.storage_subscription_error}\n\n`);
+    }
+});
+exports.subscribeStorage = subscribeStorage;
 const deleteFile = (req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = req.body;
@@ -138,4 +182,26 @@ const getDataSalt = (req, res, _next) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.getDataSalt = getDataSalt;
+const checkUploadTime = (req, res, _next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const params = req.query;
+        const response = yield database_1.pool.query("SELECT epochtime FROM USERS WHERE username LIKE $1;", [params.username]);
+        const isLastUpload = parseInt(params.uploadtime) >
+            parseInt(response.rows[0].epochtime);
+        if (!isLastUpload) {
+            return res.status(200).json({
+                isLastUpload: isLastUpload,
+                message: i18n_1.i18n.storage_time_error,
+            });
+        }
+        return res.status(200).json({
+            isLastUpload: isLastUpload,
+            message: i18n_1.i18n.storage_time_success,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({ message: i18n_1.i18n.storage_time_check_error });
+    }
+});
+exports.checkUploadTime = checkUploadTime;
 //# sourceMappingURL=filesController.js.map

@@ -1,4 +1,4 @@
-import { ICryptoOptions } from '../interfaces/interfaces';
+import { ICryptoOptions } from "../interfaces/interfaces";
 interface EncryptedData {
     base64IV: string;
     base64Data: string;
@@ -48,7 +48,7 @@ export declare class CryptoUtil {
      * @param {string} dataIV used to encrypt data
      */
     decryptData(encryptedData: ArrayBuffer, dataIV: string): Promise<ArrayBuffer | undefined>;
-    downloadDataFromUrl(downloadUrl: string): Promise<void>;
+    downloadDataFromUrl(downloadUrl: string, saltData: string): Promise<string>;
     downloadDataFromLocalStorage(saltData: string): Promise<void>;
     convertBufferToBase64(data: ArrayBuffer): string;
     convertBase64ToBuffer(data: string): string | Uint8Array;

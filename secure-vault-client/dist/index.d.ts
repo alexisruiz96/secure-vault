@@ -1,9 +1,14 @@
 import { AxiosResponse } from "axios";
 import { IApiOptions, ICryptoOptions, IKeyPrefixes, ILoginUser, User } from "./interfaces/interfaces";
+import { EventSourcePolyfill } from "event-source-polyfill";
 export interface Options {
     apiOptions: IApiOptions;
     keyPrefixes: IKeyPrefixes;
     cryptoOptions: ICryptoOptions;
+}
+export interface StorageContainer {
+    epochtime: number;
+    data: string;
 }
 export declare class SecureVaultClient {
     private _options;
@@ -24,5 +29,8 @@ export declare class SecureVaultClient {
     getStorage(): Promise<AxiosResponse>;
     setStorage(storage: File): Promise<AxiosResponse>;
     downloadStorageToDisk(): Promise<void>;
+    subscribeStorage(): Promise<EventSourcePolyfill>;
+    unsubscribeStorage(eventSource: EventSourcePolyfill): Promise<void>;
+    getReadableStorage(response: any): Promise<StorageContainer>;
     private checkAppendedFormData;
 }

@@ -6,6 +6,7 @@ import { secureVault } from "../index";
 import { ILoginUser } from "../models/interfaces/interfaces";
 import { i18n } from "../i18n/i18n";
 import { notify } from "../modules/notifications";
+import { EventSourcePolyfill } from "event-source-polyfill";
 
 interface Props {
     children: React.ReactNode[] | React.ReactNode;
@@ -18,6 +19,7 @@ export type AuthContextType = {
     logout: () => void;
     error: string;
     storage: string | null;
+    eventSource: EventSourcePolyfill | null;
 };
 
 const defaultIUserLogin = { username: "", password: "", salt: "" };
@@ -28,6 +30,7 @@ const defaultContext: AuthContextType = {
     logout: () => {},
     error: "",
     storage: "",
+    eventSource: null,
 };
 
 export const AuthContext = createContext<AuthContextType | null>(
@@ -42,6 +45,7 @@ export const useAuth = () => {
 
     return auth;
 };
+// export let eventSource: EventSourcePolyfill | null = null;
 
 export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
     const [user, setUser] = useState<ILoginUser>({
@@ -51,6 +55,9 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
     const [error, setError] = useState("");
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [storage, setStorage] = useState<string | null>(null);
+    const [eventSource, setEventSource] = useState<EventSourcePolyfill | null>(
+        null
+    );
     const navigate = useNavigate();
 
     const login = async (details: ILoginUser) => {
@@ -65,7 +72,6 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
             secureVault
                 .getStorage()
                 .then((res) => {
-                    debugger;
                     if (res.status === 201) {
                         localStorage.setItem(
                             "vault_data_epochtime",
@@ -73,6 +79,7 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
                         );
                         setStorage(JSON.stringify(JSON.parse(res.data.storage.data), undefined,2));
                         console.log("Storage loaded");
+                        startSubscription();
                     }
                 })
                 .catch((error) => {
@@ -99,7 +106,12 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
         secureVault.logout();
         localStorage.removeItem("vault_data_epochtime");
         setStorage(null);
+        secureVault.unsubscribeStorage(eventSource as EventSourcePolyfill);
         navigate("/login");
+    };
+
+    const startSubscription = async () => {
+        setEventSource(await secureVault.subscribeStorage());
     };
 
     return (
@@ -111,6 +123,7 @@ export const AuthProvider: React.FC<Props> = ({ children }: Props) => {
                 logout,
                 error,
                 storage,
+                eventSource
             }}
         >
             {children}

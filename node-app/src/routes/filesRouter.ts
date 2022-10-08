@@ -2,7 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import passport from 'passport';
 
-import { deleteFile, downloadFile, getDataSalt, uploadFile, checkUploadTime } from '../controllers/filesController';
+import { deleteFile, downloadFile, subscribeStorage, getDataSalt, uploadFile, checkUploadTime } from '../controllers/filesController';
 
 const filesRouter = Router();
 
@@ -18,9 +18,15 @@ filesRouter.post(
 );
 
 filesRouter.get(
-    "/download",
+    "/storage",
     passport.authorize("jwt", { session: false }),
     downloadFile
+);
+
+filesRouter.get(
+    "/storageSubscription",
+    passport.authorize("jwt", { session: false }),
+    subscribeStorage
 );
 
 filesRouter.get(

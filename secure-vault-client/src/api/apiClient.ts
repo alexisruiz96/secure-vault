@@ -1,6 +1,6 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosResponse } from "axios";
 
-import { ILoginUser, User } from '../interfaces/interfaces';
+import { ILoginUser, User } from "../interfaces/interfaces";
 
 export class ApiClient {
     private _axios: AxiosInstance;
@@ -33,10 +33,9 @@ export class ApiClient {
                 Allow: "POST",
                 "Content-Type": "application/json",
             },
-        })
-        .catch((error) => {
+        }).catch((error) => {
             return error.response;
-        });        
+        });
 
         return response.status;
     }
@@ -53,8 +52,7 @@ export class ApiClient {
                 Allow: "POST",
                 "Content-Type": "application/json",
             },
-        })
-        .catch((error) => {
+        }).catch((error) => {
             return error.response;
         });
         this._axios.defaults.headers.common["Authorization"] =
@@ -106,7 +104,7 @@ export class ApiClient {
     async getData(user: string) {
         return this._axios({
             method: "get",
-            url: "files/download",
+            url: "files/storage",
             params: {
                 username: user,
             },
@@ -117,7 +115,7 @@ export class ApiClient {
         });
     }
 
-    async checkIsLastUpload(user:string, uploadTime: number) {
+    async checkIsLastUpload(user: string, uploadTime: number) {
         return this._axios({
             method: "get",
             url: "files/checkuploadtime",
@@ -131,4 +129,15 @@ export class ApiClient {
             },
         });
     }
+
+    async getAuthorizationHeadersStorage(user: string) {
+
+        return {
+            headers: {
+                Authorization: this._axios.defaults.headers.common["Authorization"] as string,
+                username: user
+            }
+        }
+    }
+        
 }

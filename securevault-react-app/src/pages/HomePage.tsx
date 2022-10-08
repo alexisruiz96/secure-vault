@@ -10,7 +10,7 @@ import { i18n } from "../i18n/i18n";
 
 const HomePage: React.FC = () => {
     // SET VARIABLES
-    const { user, logout, storage } = useAuth();
+    const { user, logout, storage, eventSource } = useAuth();
     const [file, setFile] = useState<File | null>(null);
     // const [salt, setSalt] = useState<string | null>(null);
     //TODO if we want to show several files, add an array of ids or something similar
@@ -25,6 +25,43 @@ const HomePage: React.FC = () => {
         | null
     >("Upload");
     const [isUploadActive, setIsUploadActive] = useState(true);
+    const [homeStorage,setHomeStorage] = useState<string | null>(storage);
+    const [isEventSourceActive, setIsEventSourceActive] = useState(false);
+
+    const getUpdatedStorage = async (result:any) => {
+        secureVault.getReadableStorage(result).then((response) => {
+            setHomeStorage(JSON.stringify(JSON.parse(response.data), undefined,2));
+            localStorage.setItem("vault_data_epochtime", response.epochtime.toString());
+            console.log("Vault updated");
+        });
+    }
+
+    useEffect(() => {
+        setHomeStorage(() => storage);
+      }, [storage]); 
+    
+    useEffect( () => {
+        if (eventSource && !isEventSourceActive) {
+            eventSource.onmessage = (result) => {
+                const data = JSON.parse(result.data);
+                const localEpoch = (localStorage.getItem("vault_data_epochtime")!==null)?parseInt(localStorage.getItem("vault_data_epochtime")!):0;
+                const remoteEpoch = parseInt(data.epochtime);
+                if (remoteEpoch > localEpoch) {
+                    getUpdatedStorage(result);
+                }
+            };
+            
+            eventSource.onerror = (err) => {
+                console.log("EventSource error: ", err);
+            };
+
+            eventSource.onopen = () => {
+                console.log("EventSource opened");
+            };
+            
+            setIsEventSourceActive(true);
+        }
+    }, [eventSource, isEventSourceActive]);
 
     const handleUpload = async () => {
         if (uploadState === "Uploading") return;
@@ -38,6 +75,7 @@ const HomePage: React.FC = () => {
             if (response.status === 500) throw new Error(response.data.message);
 
             //TODO define type/interface on library for data
+            setHomeStorage(response.data.storage);
             setDownloadPage(response.data.downloadPage);
             setUploadState("Upload Successful");
             notify(i18n.file_upload_success, "success");
@@ -96,7 +134,7 @@ const HomePage: React.FC = () => {
                         </div>
                         
                         <div className="w-full text-left bg-slate-400 h-96 rounded-md pl-2 mt-6 h-full">
-                            <pre className="max-w-full overflow-auto">{storage}</pre>
+                            <pre className="max-w-full overflow-auto"><code>{homeStorage}</code></pre>
                         </div>
                         
                     </div>

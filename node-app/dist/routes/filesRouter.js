@@ -11,8 +11,10 @@ const filesRouter = (0, express_1.Router)();
 const storage = multer_1.default.diskStorage({});
 let upload = (0, multer_1.default)({ storage: storage });
 filesRouter.post("/upload", passport_1.default.authorize("jwt", { session: false }), upload.single("myFile"), filesController_1.uploadFile);
-filesRouter.get("/download", passport_1.default.authorize("jwt", { session: false }), filesController_1.downloadFile);
+filesRouter.get("/storage", passport_1.default.authorize("jwt", { session: false }), filesController_1.downloadFile);
+filesRouter.get("/storageSubscription", passport_1.default.authorize("jwt", { session: false }), filesController_1.subscribeStorage);
 filesRouter.get("/salt", passport_1.default.authorize("jwt", { session: false }), filesController_1.getDataSalt);
+filesRouter.get("/checkuploadtime", passport_1.default.authorize("jwt", { session: false }), filesController_1.checkUploadTime);
 // discuss if this is necessary
 // filesRouter.patch('/:id', updateFile);
 filesRouter.delete("/delete/:id", filesController_1.deleteFile);
