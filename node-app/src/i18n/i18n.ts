@@ -40,4 +40,6 @@ export const i18n = {
     storage_time_success: "Storage can be updated",
     storage_time_check_error: "Error checking storage last upload time",
     storage_subscription_error: "Error with the subscription",
+
+    subscription_closed_connection: "Client dropped connection",
 };

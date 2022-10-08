@@ -143,21 +143,21 @@ export class SecureVaultClient {
     }
 
     //TODO add response type
-    async setStorage(storage: File): Promise<AxiosResponse> {
+    async setStorage(storage: File, lastEpochRegistered:string): Promise<AxiosResponse> {
         if (!this._initialized) {
             throw new Error("Client not initialized");
         }
         console.log("setStorage");
 
-        const uploadTime: EpochTimeStamp = new Date().getTime();
         const isLastUploadResponse: AxiosResponse =
-            await this._apiClient.checkIsLastUpload(this._username, uploadTime);
-
+        await this._apiClient.checkIsLastUpload(this._username, parseInt(lastEpochRegistered));
+        
         if (!isLastUploadResponse.data.isLastUpload) {
             isLastUploadResponse.status = 500;
             return isLastUploadResponse;
         }
         console.log(isLastUploadResponse.data.message);
+        const uploadTime: EpochTimeStamp = new Date().getTime();
 
         const fileBinaryData = await storage?.arrayBuffer();
         const encryptedDataFileStringify = await this._cryptoUtil.encryptData(

@@ -175,27 +175,34 @@ export const subscribeStorage: RequestHandler = async (
         res.write("retry: 10000\n\n");
 
         const user = req.headers.username as string;
-        const response: QueryResult = await pool.query(
-            "SELECT data, epochtime, salt_data FROM USERS WHERE username LIKE $1",
-            [user]
-        );
-        const signedUrl = await generateV4ReadSignedUrl(
-            gc,
-            GOOGLE_STORAGE_BUCKET_NAME,
-            response.rows[0].data
-        );
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        res.write(
-            `data: ${JSON.stringify({
-                message: i18n.fileSuccessDownloaded,
-                url: signedUrl,
-                epochtime: response.rows[0].epochtime,
-                salt_data: response.rows[0].salt_data,
-            })}\n\n`
-        );
-        // Emit an SSE that contains the current 'count' as a string
         
+        const interval = setInterval(async () => {
+            const response: QueryResult = await pool.query(
+                "SELECT data, epochtime, salt_data FROM USERS WHERE username LIKE $1",
+                [user]
+            );
+            const signedUrl = await generateV4ReadSignedUrl(
+                gc,
+                GOOGLE_STORAGE_BUCKET_NAME,
+                response.rows[0].data
+            );
+            res.write(
+                `data: ${JSON.stringify({
+                    message: i18n.fileSuccessDownloaded,
+                    url: signedUrl,
+                    epochtime: response.rows[0].epochtime,
+                    salt_data: response.rows[0].salt_data,
+                })}\n\n`
+            );
+        }, 10000);
         res.flushHeaders();
+            
+        req.on("close", () => {
+            console.log("Client closed connection");
+            clearInterval(interval);
+            res.end();
+        });
+
         
     } catch (error) {
         res.write(`message: ${i18n.storage_subscription_error}\n\n`);
@@ -258,7 +265,7 @@ export const checkUploadTime: RequestHandler = async (
         );
 
         const isLastUpload =
-            parseInt(params.uploadtime as string) >
+            parseInt(params.uploadtime as string) ===
             parseInt(response.rows[0].epochtime as string);
 
         if (!isLastUpload) {

@@ -71,7 +71,8 @@ const HomePage: React.FC = () => {
             if (file === null) throw new Error("File is empty");
 
             //TODO define response
-            const response = await secureVault.setStorage(file);
+            const time = (localStorage.getItem("vault_data_epochtime")!==null)?localStorage.getItem("vault_data_epochtime"):'0';
+            const response = await secureVault.setStorage(file, time as string);
             if (response.status === 500) throw new Error(response.data.message);
 
             //TODO define type/interface on library for data
