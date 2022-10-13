@@ -1,0 +1,58 @@
+@startuml SetStorage
+!pragma teoz true
+
+box "Client" #LightBlue
+box "React App" #LightSkyBlue
+actor User
+participant App
+end box
+box "Secure Vault Library" #LightSkyBlue
+participant "Vault Library" as SVC
+end box
+end box
+box "Server" #LightSalmon
+participant Server
+database PostgreSQL
+end box
+
+User -> App : Upload JSON File
+activate App
+    App -> App : Get epochtime from\nLocal Storage
+    App -> SVC: secureVault\n.setStorage(File,epochtime)
+        activate SVC
+        SVC -> Server: GET files/checkuploadtime\n{epochtime,username}
+        activate Server
+        group Passport Jwt Strategy\n
+        activate Server
+            Server -> Server: Verify token
+            Server -> PostgreSQL: Check username exists
+            Server <-- PostgreSQL: Database Response
+            Server -> Server: Passport Jwt Strategy\nCallback
+        deactivate Server
+        end
+        Server -> PostgreSQL: Get epochtime for user
+        Server <-- PostgreSQL: Database Response
+        activate Server
+            Server -> Server: Epochtime\n < \nepochtime \nLocal Storage
+        deactivate Server
+        SVC <-- Server: Response 200 with\n{isLastUpload = true\n,message}
+        deactivate Server
+        SVC -> SVC: Encrypt Storage File
+        SVC -> Server: POST files/upload\n
+        activate Server
+        group Passport Jwt Strategy
+            Server --> Server: ...
+        end
+        Server -> Google: Upload File
+        Server <-- Google: Success
+        Server -> PostgreSQL: Update epochtime,data\n & salt_data for user
+        Server -> Google: Get Signed URL
+        Server <-- Google: Signed URL
+        SVC <-- Server: Response 201 with\n{message,"true",signedURL} 
+        deactivate Server
+        App <-- SVC: Response 201 with\n{decrypted storage, epochtime}
+        deactivate SVC
+    App -> App: Set Decrypted Storage\non Json Viewer\n
+    App -> App: Set epochtime\non Local Storage
+    User <-- App: Show Decrypted Storage\non Json Viewer
+deactivate App

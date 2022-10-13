@@ -1,24 +1,36 @@
-@startuml Login
+@startuml SignUp
 !pragma teoz true
 
 box "Client" #LightBlue
+box "React App" #LightSkyBlue
 actor User
 participant App
+end box
+box "Secure Vault Library" #LightSkyBlue
+participant "Vault Library" as SVC
+end box
 end box
 box "Server" #LightSalmon
 participant Server
 database PostgreSQL
 end box
 
-User -> App: Sign Up Request
+User -> App: Send \n{user, pwd,\nepoch,data,email}\nas User
 activate App
-App -> App: Execute scrypt(salt, derived pwd)
-{start} App -> Server: POST {username, email, kdf(derived_pwd), salt}
-Server -> Server: Execute pbkdf2(salt, kdf pwd)
-Server -> PostgreSQL: Save {username, email, kdf2(kdf pwd), salt}
+activate SVC
+App -> SVC: secureVault.signUp(User)
+SVC -> SVC: Generate Auth Key
+SVC -> SVC: Set User.pwd with Auth \nKey
+SVC -> Server: POST {User}
+Server -> Server: Generate Server Salt
+Server -> Server: Execute pbkdf2 on User.pwd\nwith Server Salt
+Server -> Server: Set User.pwd with Server derived \nkey
+Server -> PostgreSQL: Save User
 Server <-- PostgreSQL: User Created Response
-{end} App <-- Server: Server Response
-User <-- App: Sign Up Response
+SVC <-- Server: Server Response
+deactivate SVC
+App <-- SVC: Server Response
+User <-- App: Sign Up Toast \nNotification
 deactivate App
 
 {start} <-> {end} : 5 seconds timeout

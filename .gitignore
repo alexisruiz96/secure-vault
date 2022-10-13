@@ -13,6 +13,7 @@ testing-ground/typescript/understand-ts_new/node_modules/*
 .vscode/*
 node-app/node_modules/*
 disableCORS/*
+disableCORS2/*
 node-app/dist/*
 node-app/secure-vault-360217-623afffad8b7.json
 node-app/.env
