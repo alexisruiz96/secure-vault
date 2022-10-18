@@ -125,7 +125,7 @@ export class SecureVaultClient {
             response.data.salt_data
         );
         storageContainer.epochtime = response.data.epochtime;
-        //TEST
+
         const test = new File([data], "test.json", {
             type: "application/json",
         });
@@ -133,7 +133,6 @@ export class SecureVaultClient {
         storageContainer.data = val;
         console.log(val);
 
-        //TEST
         response.data["storage"] = storageContainer;
         //download storage from google storage
         //save encrypted file to local storage

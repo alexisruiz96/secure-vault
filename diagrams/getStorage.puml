@@ -1,4 +1,4 @@
-@startuml GetStorage
+@startuml GetStorageV2
 !pragma teoz true
 
 box "Client" #LightBlue

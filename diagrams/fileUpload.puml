@@ -1,0 +1,35 @@
+@startuml FileUpload
+!pragma teoz true
+
+box "Client"
+participant "Vault Library" as SVC
+end box
+box "Server" 
+participant Server
+database Database
+end box
+
+group Error Use Case\n
+    activate SVC
+    SVC -> Server: Request: is local upload time\nthe last one registered in the\ndatabase? 
+    activate Server
+    Server -> Database:  Check is time upload local > time upload server
+    Server <- Database: <font color=red><b>False
+    SVC <- Server: <font color=red><b>Response 500: Server Error
+    deactivate Server
+    deactivate SVC
+end
+group Success Use Case
+    activate SVC
+    SVC -> Server: Request: is local last upload time\nthe last one in the database? 
+    activate Server
+    Server -> Database: Check is time upload local > time upload server
+    Server <-- Database: <font color=green><b>True
+    SVC <-- Server: <font color=green><b>Response 200: OK
+    SVC -> Server: Send Encrypted Data with time upload
+    Server -> Google: Save Data
+    Server <- Google: <font color=green><b>Response 200: OK {file_id}
+    Server -> Database: Save file_id and time upload
+    deactivate Server
+    deactivate SVC
+end
