@@ -1,0 +1,42 @@
+@startgantt GantDiagram
+printscale weekly
+Project starts the 18th of february 2022
+[Project development & Meetings] as [TASK1] starts 2022-02-18
+[Learning Technologies to Use] as [TASK2] starts 2022-02-18
+[Development of frontend application] as [TASK3] starts 2022-03-19
+[Development of Server] as [TASK4] starts 2022-04-01
+[Implement Library] as [TASK7] starts 2022-04-15
+[Configure Google Storage] as [TASK5] starts 2022-06-15
+[Connect GS to Server Requests] as [TASK6] starts 2022-06-30
+[Refactor frontend application] as [TASK8] starts 2022-07-21
+[Refactor backend part] as [TASK9] starts 2022-08-01
+[Implement Secure Vault Sync] as [TASK10] starts 2022-08-16
+[Write Thesis] as [TASK11] starts 2022-09-01
+[Presentation] as [TASK12] starts 2022-09-25
+
+[TASK1] lasts 248 days
+[TASK2] lasts 30 days
+[TASK3] lasts 153 days
+[TASK4] lasts 140 days
+[TASK5] lasts 15 days
+[TASK6] lasts 15 days
+[TASK7] lasts 126 days
+[TASK8] lasts 10 days
+[TASK9] lasts 15 days
+[TASK10] lasts 15 days
+[TASK11] lasts 30 days
+[TASK12] lasts 10 days
+
+[TASK1] is colored in Lavender/LightBlue
+[TASK2] is colored in Lavender/LightBlue
+[TASK3] is colored in Lavender/LightBlue
+[TASK4] is colored in Lavender/LightBlue
+[TASK5] is colored in Lavender/LightBlue
+[TASK6] is colored in Lavender/LightBlue
+[TASK7] is colored in Lavender/LightBlue
+[TASK8] is colored in Lavender/LightBlue
+[TASK9] is colored in Lavender/LightBlue
+[TASK10] is colored in Lavender/LightBlue
+[TASK11] is colored in Lavender/LightBlue
+
+@endgantt

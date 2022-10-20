@@ -1,0 +1,10 @@
+@startuml basicFlow
+[User] -right-> Step1: Introduce\npassword
+Step1 -right-> Step2: Execute high cost KDF on\n(auth prefix + password)
+Step2 -right-> Step3: Send derived key to server
+Step3 -down-> Step4: Execute server low cost\nKDF\non derivedkey
+Step4 -left-> Step5: Check password and\nLogin Success response
+Step5 -left-> Step6: Execute KDF on\n(enc prefix + password)\non client
+Step6 -left-> Step7: Generate encryption\nkey
+
+@enduml

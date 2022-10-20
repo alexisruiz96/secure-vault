@@ -1,0 +1,67 @@
+@startuml InitializeV2
+!pragma teoz true
+
+box "Client" #LightBlue
+entity App
+box "Secure Vault Library" #LightSkyBlue
+participant "Vault Library" as SVC
+end box
+end box
+box "Server" #LightSalmon
+participant Server
+database PostgreSQL
+end box
+
+activate App
+    App -> SVC: secureVault.initialize(LoginUser)
+    activate SVC
+        SVC -> SVC: Generate Auth Key
+        SVC -> SVC: Set LoginUser.password with\nAuth Key
+        SVC -> Server: POST users/login\n{LoginUser}
+        activate Server
+        group Passport Local Strategy\non LoginUser
+            Server -> PostgreSQL: Check username and password
+            Server <-- PostgreSQL: Database Response OK
+            Server -> Server: Passport Local Strategy\nCallback
+            activate Server
+            Server -> Server: Generate JWT as auth_token
+            deactivate Server
+        end
+        SVC <-- Server: Response 200 with\n{isLogged, message,\nusername, auth_token}
+        deactivate Server
+        SVC -> SVC: Set Authorization Header with\nauth_token
+        SVC -> SVC: Generate Encryption Key
+        App <-- SVC: Response 200
+        deactivate SVC
+        App -> SVC: secureVault.getStorage()
+        activate SVC
+        SVC -> Server: GET files/storage
+        activate Server
+        group Passport Jwt Strategy\n
+        activate Server
+            Server -> Server: Verify token
+            Server -> PostgreSQL: Check username exists
+            Server <-- PostgreSQL: Database Response
+            Server -> Server: Passport Jwt Strategy\nCallback
+        deactivate Server
+        end
+        Server -> PostgreSQL: Get data,epochtime,salt data
+        Server <-- PostgreSQL: Database Response
+        Server -> Google: Get Signed URL
+        Server <-- Google: Signed URL
+        SVC <-- Server: Response 201 with\n{message,storageUrl\necpohtime,salt_data}
+        deactivate Server
+        SVC -> SVC: Download Storage File\nfrom Url on memory
+        SVC -> SVC: Decrypt Storage File\nwith Encryption Key
+        App <-- SVC: Response 201 with\n{decrypted storage, epochtime}
+        deactivate SVC
+    App -> App: Set Decrypted Storage
+    App -> App: Set epochtime
+    App -> SVC: Start Subscription
+    activate SVC
+    SVC -> SVC: Create EventSourcePolyfill \n /files/storageSubscription
+    SVC <--Server: Event 1
+    SVC <--Server: Event ...
+    SVC <--Server: Event n
+deactivate App
+@enduml

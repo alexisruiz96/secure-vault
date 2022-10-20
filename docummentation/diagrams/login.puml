@@ -1,0 +1,37 @@
+@startuml LoginV2
+!pragma teoz true
+
+box "Client" #LightBlue
+entity App
+box "Secure Vault Library" #LightSkyBlue
+participant "Vault Library" as SVC
+end box
+end box
+box "Server" #LightSalmon
+participant Server
+database PostgreSQL
+end box
+
+' TODO: Add when it returns download file info to the user
+activate App
+    App -> SVC: secureVault.initialize(LoginUser)
+    activate SVC
+        SVC -> SVC: Generate Auth Key
+        SVC -> SVC: Set LoginUser.password with\nAuth Key
+        SVC -> Server: POST users/login\n{LoginUser}
+        activate Server
+        group Passport Local Strategy\non LoginUser
+            Server -> PostgreSQL: Check username and password
+            Server <-- PostgreSQL: Database Response OK
+            Server -> Server: Passport Local Strategy\nCallback
+            activate Server
+            Server -> Server: Generate JWT as auth_token
+            deactivate Server
+        end
+        SVC <-- Server: Response 200 with\n{isLogged, message,\nusername, auth_token}
+        deactivate Server
+        SVC -> SVC: Set Authorization Header with\nauth_token
+        SVC -> SVC: Generate Encryption Key
+        App <-- SVC: Response 200
+    deactivate SVC
+deactivate App
