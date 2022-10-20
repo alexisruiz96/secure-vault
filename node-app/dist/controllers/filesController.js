@@ -136,17 +136,22 @@ const subscribeStorage = (req, res, _next) => __awaiter(void 0, void 0, void 0, 
         // Tell the client to retry every 10 seconds if connectivity is lost
         res.write("retry: 10000\n\n");
         const user = req.headers.username;
-        const response = yield database_1.pool.query("SELECT data, epochtime, salt_data FROM USERS WHERE username LIKE $1", [user]);
-        const signedUrl = yield generateV4ReadSignedUrl(gc, config_1.GOOGLE_STORAGE_BUCKET_NAME, response.rows[0].data);
-        yield new Promise((resolve) => setTimeout(resolve, 1000));
-        res.write(`data: ${JSON.stringify({
-            message: i18n_1.i18n.fileSuccessDownloaded,
-            url: signedUrl,
-            epochtime: response.rows[0].epochtime,
-            salt_data: response.rows[0].salt_data,
-        })}\n\n`);
-        // Emit an SSE that contains the current 'count' as a string
+        const interval = setInterval(() => __awaiter(void 0, void 0, void 0, function* () {
+            const response = yield database_1.pool.query("SELECT data, epochtime, salt_data FROM USERS WHERE username LIKE $1", [user]);
+            const signedUrl = yield generateV4ReadSignedUrl(gc, config_1.GOOGLE_STORAGE_BUCKET_NAME, response.rows[0].data);
+            res.write(`data: ${JSON.stringify({
+                message: i18n_1.i18n.fileSuccessDownloaded,
+                url: signedUrl,
+                epochtime: response.rows[0].epochtime,
+                salt_data: response.rows[0].salt_data,
+            })}\n\n`);
+        }), 10000);
         res.flushHeaders();
+        req.on("close", () => {
+            console.log("Client closed connection");
+            clearInterval(interval);
+            res.end();
+        });
     }
     catch (error) {
         res.write(`message: ${i18n_1.i18n.storage_subscription_error}\n\n`);
@@ -186,7 +191,7 @@ const checkUploadTime = (req, res, _next) => __awaiter(void 0, void 0, void 0, f
     try {
         const params = req.query;
         const response = yield database_1.pool.query("SELECT epochtime FROM USERS WHERE username LIKE $1;", [params.username]);
-        const isLastUpload = parseInt(params.uploadtime) >
+        const isLastUpload = parseInt(params.uploadtime) ===
             parseInt(response.rows[0].epochtime);
         if (!isLastUpload) {
             return res.status(200).json({

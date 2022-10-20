@@ -27,7 +27,7 @@ export declare class SecureVaultClient {
     login(user: ILoginUser): Promise<AxiosResponse>;
     logout(): Promise<void>;
     getStorage(): Promise<AxiosResponse>;
-    setStorage(storage: File): Promise<AxiosResponse>;
+    setStorage(storage: File, lastEpochRegistered: string): Promise<AxiosResponse>;
     downloadStorageToDisk(): Promise<void>;
     subscribeStorage(): Promise<EventSourcePolyfill>;
     unsubscribeStorage(eventSource: EventSourcePolyfill): Promise<void>;
