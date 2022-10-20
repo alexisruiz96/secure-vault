@@ -1,11 +1,8 @@
-@startuml Login
+@startuml LoginV2
 !pragma teoz true
 
 box "Client" #LightBlue
-box "React App" #LightSkyBlue
-actor User
-participant App
-end box
+entity App
 box "Secure Vault Library" #LightSkyBlue
 participant "Vault Library" as SVC
 end box
@@ -16,7 +13,6 @@ database PostgreSQL
 end box
 
 ' TODO: Add when it returns download file info to the user
-User -> App: Send {user,password}\nas LoginUser
 activate App
     App -> SVC: secureVault.initialize(LoginUser)
     activate SVC
@@ -38,5 +34,4 @@ activate App
         SVC -> SVC: Generate Encryption Key
         App <-- SVC: Response 200
     deactivate SVC
-    User <-- App: Show Home Page
 deactivate App

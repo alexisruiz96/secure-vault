@@ -1,11 +1,8 @@
-@startuml SignUp
+@startuml SignUpV2
 !pragma teoz true
 
 box "Client" #LightBlue
-box "React App" #LightSkyBlue
-actor User
-participant App
-end box
+entity App
 box "Secure Vault Library" #LightSkyBlue
 participant "Vault Library" as SVC
 end box
@@ -15,7 +12,6 @@ participant Server
 database PostgreSQL
 end box
 
-User -> App: Send \n{user, pwd,\nepoch,data,email}\nas User
 activate App
 activate SVC
 App -> SVC: secureVault.signUp(User)
@@ -30,7 +26,6 @@ Server <-- PostgreSQL: User Created Response
 SVC <-- Server: Server Response
 deactivate SVC
 App <-- SVC: Server Response
-User <-- App: Sign Up Toast \nNotification
 deactivate App
 
 {start} <-> {end} : 5 seconds timeout

@@ -2,10 +2,7 @@
 !pragma teoz true
 
 box "Client" #LightBlue
-box "React App" #LightSkyBlue
-actor User
-participant App
-end box
+entity App
 box "Secure Vault Library" #LightSkyBlue
 participant "Vault Library" as SVC
 end box
@@ -28,17 +25,16 @@ activate App
             Server -> Server: Passport Jwt Strategy\nCallback
         deactivate Server
         end
-        Server -> PostgreSQL: Get data,epochtime,salt data
+        Server -> PostgreSQL: Get data,epochtime,iv_data
         Server <-- PostgreSQL: Database Response
         Server -> Google: Get Signed URL
         Server <-- Google: Signed URL
-        SVC <-- Server: Response 201 with\n{message,storageUrl\necpohtime,salt_data}
+        SVC <-- Server: Response 201 with\n{message,storageUrl\necpohtime,iv_data}
         deactivate Server
         SVC -> SVC: Download Storage File\nfrom Url on memory
         SVC -> SVC: Decrypt Storage File\nwith Encryption Key
         App <-- SVC: Response 201 with\n{decrypted storage, epochtime}
         deactivate SVC
-    App -> App: Set Decrypted Storage\non Json Viewer\n
-    App -> App: Set epochtime\non Local Storage
-    User <-- App: Show Decrypted Storage on Json Viewer
+    App -> App: Set Decrypted Storage
+    App -> App: Set epochtime
 deactivate App

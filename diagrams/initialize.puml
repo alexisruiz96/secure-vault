@@ -1,11 +1,8 @@
-@startuml Initialize
+@startuml InitializeV2
 !pragma teoz true
 
 box "Client" #LightBlue
-box "React App" #LightSkyBlue
-actor User
-participant App
-end box
+entity App
 box "Secure Vault Library" #LightSkyBlue
 participant "Vault Library" as SVC
 end box
@@ -15,7 +12,6 @@ participant Server
 database PostgreSQL
 end box
 
-User -> App: Send {user,password}\nas LoginUser
 activate App
     App -> SVC: secureVault.initialize(LoginUser)
     activate SVC
@@ -37,7 +33,6 @@ activate App
         SVC -> SVC: Generate Encryption Key
         App <-- SVC: Response 200
         deactivate SVC
-        User <-- App: Show Home Page
         App -> SVC: secureVault.getStorage()
         activate SVC
         SVC -> Server: GET files/storage
@@ -60,9 +55,8 @@ activate App
         SVC -> SVC: Decrypt Storage File\nwith Encryption Key
         App <-- SVC: Response 201 with\n{decrypted storage, epochtime}
         deactivate SVC
-    App -> App: Set Decrypted Storage\non Json Viewer\n
-    App -> App: Set epochtime\non Local Storage
-    User <-- App: Show Decrypted Storage\non Json Viewer
+    App -> App: Set Decrypted Storage
+    App -> App: Set epochtime
     App -> SVC: Start Subscription
     activate SVC
     SVC -> SVC: Create EventSourcePolyfill \n /files/storageSubscription
