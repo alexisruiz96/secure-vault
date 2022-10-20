@@ -1,1 +1,0 @@
-export { types, resolvers } from '@/graphql';

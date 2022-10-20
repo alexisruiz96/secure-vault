@@ -1,7 +1,0 @@
--- Use this file to create the database schema
--- e.g.
---
--- create table widget (
---   id serial primary key,
---   name text
--- );
