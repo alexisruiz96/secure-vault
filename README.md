@@ -1,6 +1,9 @@
 # Secure Vault Project
 
-//TODO Create table of contents (https://youtu.be/6V5yaVhK_hE)
+- [Secure Vault Project](#secure-vault-project)
+  - [Introduction](#introduction)
+  - [Design](#design)
+
 ## Introduction
 
 The aim of this project has been to create a library that can be installed and used on the client side of a web-application in order to apply PBKDF over passwords and encrypt/decrypt data in a transparent way for the client. In order to do this, a more powerful KDF has been used (scrypt) on the client side. To achieve this, a series of points have been developed to demonstrate the functionalities of the library in a realistic environment.
