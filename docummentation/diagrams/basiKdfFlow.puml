@@ -1,10 +1,37 @@
-@startuml basicFlow
-[User] -right-> Step1: Introduce\npassword
-Step1 -right-> Step2: Execute high cost KDF on\n(auth prefix + password)
-Step2 -right-> Step3: Send derived key to server
-Step3 -down-> Step4: Execute server low cost\nKDF\non derivedkey
-Step4 -left-> Step5: Check password and\nLogin Success response
-Step5 -left-> Step6: Execute KDF on\n(enc prefix + password)\non client
-Step6 -left-> Step7: Generate encryption\nkey
+@startuml basicFlowV2
+
+skinparam state {
+    FontColor 1f1c51
+    FontSize 18
+    FontStyle bold
+    BackgroundColor #8be3ff|acffd9
+    ArrowThickness 3
+    ArrowColor 1f1c51
+    ClassFontColor red
+    arrow {
+        FontSize 22
+        LineColor Blue
+        FontColor 1f1c51
+        FontStyle bold
+        FontName Arial
+    }
+}
+
+State User
+State Step1
+State Step2
+State Step3
+State Step4
+State Step5
+State Step6
+State Step7
+
+User -right-> Step1: <b>Introduce\n<b>password
+Step1 -right-> Step2: <b>Execute high cost KDF on\n<b>(auth prefix + password)
+Step2 -right-> Step3: <b>Send authentication\nkey to server
+Step3 -down-> Step4: <b>Execute server low cost\n<b>KDF on derivedkey
+Step4 -left-> Step5: <b>Check password and\n<b>Login Success response
+Step5 -left[dotted]-> Step6: <b>Execute KDF on\n<b>(enc prefix + password)\n<b>on client
+Step6 -left[dotted]-> Step7: <b>Generate encryption\n<b>key on client
 
 @enduml

@@ -1,0 +1,64 @@
+@startuml SecureVaulClientSimple
+<style>
+classDiagram {
+  class {
+      ' attributes and methods
+      FontColor 1f1c51
+      ' class name
+      header {
+        FontSize 16
+        FontColor 1f1c51
+        FontStyle bold
+      }
+  }
+}
+</style>
+
+interface Options #8be3ff|acffd9 {
+    **apiOptions: IApiOptions**
+    **keyPrefixes: IKeyPrefixes**
+    **cryptoOptions: ICryptoOptions**
+}
+
+
+class SecureVaultClient #8be3ff|acffd9 {
+    - **options: Options**
+    - **initialized: boolean**
+    - **cryptoUtil: CryptoUtil**
+    - **apiClient: ApiClient**
+    - **username: string**
+
+    + **constructor(options: Options)**
+    + **initialize(ILoginUser)**
+    + **signUp(User)**
+    + **logout()**
+    + **getStorage()**
+    + **setStorage(File, epochtime)**
+    + **subscribeStorage()**
+    + **unsubscribeStorage(EventSourcePolyfill)**
+    + **getReadableStorage(Response)**
+}
+
+class CryptoUtil  #8be3ff|acffd9{
+    - **options: ICryptoOptions**
+    - **encCryptoKey: string**
+    - **subtleCrypto: SubtleCrypto**
+
+    + **constructor(ICryptoOptions)**
+    + **CryptoUtilFunctions()**
+}
+
+class ApiClient #8be3ff|acffd9{
+    - **axios: AxiosInstance**
+
+    + **constructor(IApiOptions)**
+    + **ApiClientFunctions()**
+}
+
+
+
+SecureVaultClient "1" *-[#1f1c51]- "1" CryptoUtil 
+SecureVaultClient "1" *-[#1f1c51]- "1" ApiClient 
+SecureVaultClient -[#1f1c51]- Options
+
+@enduml
