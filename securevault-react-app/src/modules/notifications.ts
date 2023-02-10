@@ -11,7 +11,7 @@ export const notify = (message: string, type: string) => {
         case "info":
             toast.info(message, {
                 position: "top-center",
-                autoClose: 5000,
+                autoClose: 3000,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,
@@ -22,7 +22,7 @@ export const notify = (message: string, type: string) => {
         case "success":
             toast.success(message, {
                 position: "top-center",
-                autoClose: 5000,
+                autoClose: 3000,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,
@@ -33,7 +33,7 @@ export const notify = (message: string, type: string) => {
         case "warning":
             toast.warn(message, {
                 position: "top-center",
-                autoClose: 5000,
+                autoClose: 3000,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,
@@ -44,7 +44,7 @@ export const notify = (message: string, type: string) => {
         case "error":
             toast.error(message, {
                 position: "top-center",
-                autoClose: 5000,
+                autoClose: 3000,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,
@@ -55,7 +55,7 @@ export const notify = (message: string, type: string) => {
         default:
             toast(message, {
                 position: "top-center",
-                autoClose: 5000,
+                autoClose: 3000,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,

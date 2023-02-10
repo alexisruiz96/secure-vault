@@ -73,7 +73,6 @@ export const loginUser: RequestHandler = async (
 ): Promise<Response> => {
     try {
         const user = req.body as Login;
-        // const response: QueryResult = await userQuery.validateUser(user);
 
         // if(!response.rows[0].exists) throw Error;
 

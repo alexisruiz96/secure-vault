@@ -134,7 +134,7 @@ const HomePage: React.FC = () => {
                             )}
                         </div>
                         
-                        <div className="w-full text-left bg-slate-400 h-96 rounded-md pl-2 mt-6 h-full">
+                        <div className="w-full text-left bg-slate-400 rounded-md pl-2 mt-6 h-96">
                             <pre className="max-w-full overflow-auto"><code>{homeStorage}</code></pre>
                         </div>
                         
