@@ -17,6 +17,6 @@ Because it is wanted the server to be blind in relation to the information being
 
 <p align="center">
     <img src="docummentation/out/basiKdfFlow/basicFlow.png">
-    <figcaption align = "center"><b>Fig 1. Password key derivation protocol</b></figcaption>
+    <p align = "center"><b>Fig 1. Password key derivation protocol</b></p>
 </p>
 
